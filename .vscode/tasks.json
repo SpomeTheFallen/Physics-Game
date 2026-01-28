@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                //main files
+                "main.cpp",
+                //additional files
+                "ball_player.cpp",
+                //linking/building
+                "-o",
+                "build/main.exe",
+                ";",
+                ".\\build/main.exe"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}
