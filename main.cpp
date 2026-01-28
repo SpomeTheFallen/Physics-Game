@@ -21,7 +21,7 @@ void draw(){
     for(int i = 0; i < l0Prop::rows+1 ; i++){
         for(int j = 0 ; j < l0Prop::cols+1; j++){
             //auto barrier
-            if(i == 0 || i == l0Prop::rows ){
+            if(i == 0 || i == l0Prop::rows){
                 std::cout << 'x';
                 continue;
             }
@@ -38,6 +38,9 @@ void draw(){
                 
                 if(ball[i-ballPos::row][j-ballPos::col] == 1){
                     std::cout << 'H';
+                }
+                else if(ball[i-ballPos::row][j-ballPos::col] == 2){
+                    std::cout << '#';
                 }
                 else{
                     std::cout << ' ';
