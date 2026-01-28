@@ -12,21 +12,9 @@ void clear(){
 void draw(){
     std::cout << "\x1b[H";
     
-    for(int i = 0; i < ballProp::rows + ballPos::row; i++){
-        if(i < ballPos::row){
-            std::cout << '\n';
+    for(int i = 0; i < 7; i++){
+        for(int j = 0 ; j < 7; j++){
             continue;
-        }
-        for(int j = 0 ; j < ballProp::cols + ballPos::col; j++){
-            if(j < ballPos::col){
-                std::cout << ' ';
-            }
-            else if(ball[i-ballPos::row][j-ballPos::col] == 1){
-                std::cout << 'H'; 
-            }
-            else{
-                std::cout << ' ';
-            }
         }
         std::cout << '\n';
     }
