@@ -5,3 +5,6 @@ namespace l0Prop{
 }
 
 extern int level0[l0Prop::rows][l0Prop::cols]; 
+
+
+
