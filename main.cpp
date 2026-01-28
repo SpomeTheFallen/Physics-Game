@@ -12,9 +12,7 @@ int main(){
     //Graphics run
     while(true){
         draw();      
-        if(signals::rolling_right2){
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        }      
+   
         if (_kbhit()) {           // check if a key was pressed
             char key = _getch();    // read the key without Enter
             if(key == 'd') move_right();
