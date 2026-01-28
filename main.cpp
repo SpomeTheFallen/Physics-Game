@@ -2,12 +2,10 @@
 #include <thread>
 #include <chrono>
 #include <conio.h>
+#include <windows.h>
 #include "ball_player.hpp"
 #include "level_grids.hpp"
 
-void clear(){
-    system("cls"); 
-}
 /*
 In draw we imagine the terminal as a grid
 It updates line by line, or every col for each row
@@ -55,10 +53,15 @@ void draw(){
     }
 }
 
+void maximizeConsole() {
+    HWND hwnd = GetConsoleWindow();
+    ShowWindow(hwnd, SW_MAXIMIZE);
+}
+
 int main(){
     std::cout << "\x1b[?25l"; //hide cursor
-    //std::cout << "\x1b[8;40;100t"; //set size rows ; col
-
+    std::cout << "\x1b[8;600;600t"; //set size rows ; col
+    std::this_thread::sleep_for(std::chrono::milliseconds(15));
     //Graphics run
     while(true){
         draw();            
@@ -70,7 +73,7 @@ int main(){
             else if (key == 's') move_down();
             else if (key == 'q') break;  // quit
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(15));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 
