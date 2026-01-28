@@ -12,9 +12,35 @@ void clear(){
 void draw(){
     std::cout << "\x1b[H";
     
-    for(int i = 0; i < 7; i++){
-        for(int j = 0 ; j < 7; j++){
-            continue;
+    for(int i = 0; i < l0Prop::rows+1 ; i++){
+        for(int j = 0 ; j < l0Prop::cols+1; j++){
+            //auto barrier
+            if(i == 0 || i == l0Prop::rows ){
+                std::cout << 'x';
+                continue;
+            }
+            if(j == 0 || j == l0Prop::cols){
+                std::cout << 'x';
+                continue;
+            }
+            //level design
+            if(level0[i][j] == 1){
+                std::cout << 'x';
+            }
+            //ball posistion
+            else if(ballPos::col == j){
+                for(int x = 0 ; x < ballProp::cols ; x++){
+                    if(ball[i][x] == 1){
+                        std::cout << 'H';
+                    }
+                    else{
+                        std::cout << ' ';
+                    }
+                }
+            }
+            else{
+                std::cout << ' ';
+            }
         }
         std::cout << '\n';
     }

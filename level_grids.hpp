@@ -3,7 +3,7 @@ namespace l0Prop{
     const int rows = 7;
     const int cols = 27;
 }
-
+// 0 = air, 1 = block
 int level0[l0Prop::rows][l0Prop::cols] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 

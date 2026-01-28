@@ -3,9 +3,10 @@ namespace ballProp{
     const int cols = 9;
 }
 
+//marks the balls highest and most left points.
 namespace ballPos{
-    inline int col = 0;
-    inline int row = 0;
+    inline int col = 1;
+    inline int row = 1;
 }
 
 void move_right();

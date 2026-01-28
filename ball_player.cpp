@@ -3,7 +3,7 @@
 /*
 This is the ball
 */
-// 0 surronding, 1 is ball
+// 0 = air, 1 = ball
 
 int ball[ballProp::rows][ballProp::cols] = {
     0, 0, 1, 1, 1, 1, 1, 0, 0, 
