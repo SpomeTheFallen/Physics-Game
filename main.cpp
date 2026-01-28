@@ -8,7 +8,13 @@
 void clear(){
     system("cls"); 
 }
-
+/*
+In draw we imagine the terminal as a grid
+It updates line by line, or every col for each row
+We set a barrier to bound the level, so we must shift the level's array by 1 in each index.
+To draw the ball, we check if the index we are on is its posistion relative to the terminal grid, then fill the line
+It is important to note, cursor posistion affects print and not the index, so they must be set to always match.
+*/
 void draw(){
     std::cout << "\x1b[H";
     
@@ -28,15 +34,15 @@ void draw(){
                 std::cout << 'x';
             }
             //ball posistion
-            else if(ballPos::col == j){
-                for(int x = 0 ; x < ballProp::cols ; x++){
-                    if(ball[i-1][x] == 1){
-                        std::cout << 'H';
-                    }
-                    else{
-                        std::cout << ' ';
-                    }
+            else if((ballPos::col <= j && j < ballPos::col + ballProp::cols) && (ballPos::row <= i && i < ballPos::row + ballProp::rows) ){
+                
+                if(ball[i-ballPos::row][j-ballPos::col] == 1){
+                    std::cout << 'H';
                 }
+                else{
+                    std::cout << ' ';
+                }
+                
             }
             else{
                 std::cout << ' ';
@@ -48,7 +54,7 @@ void draw(){
 
 int main(){
     std::cout << "\x1b[?25l"; //hide cursor
-    std::cout << "\x1b[8;40;100t"; //set size rows ; col
+    //std::cout << "\x1b[8;40;100t"; //set size rows ; col
 
     //Graphics run
     while(true){

@@ -3,7 +3,7 @@ namespace ballProp{
     const int cols = 9;
 }
 
-//marks the balls highest and most left points.
+//marks the balls highest and most left points relative to terminal grid.
 namespace ballPos{
     inline int col = 1;
     inline int row = 1;
