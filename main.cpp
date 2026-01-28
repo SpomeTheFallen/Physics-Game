@@ -24,13 +24,13 @@ void draw(){
                 continue;
             }
             //level design
-            if(level0[i][j] == 1){
+            if(level0[i-1][j-1] == 1){
                 std::cout << 'x';
             }
             //ball posistion
             else if(ballPos::col == j){
                 for(int x = 0 ; x < ballProp::cols ; x++){
-                    if(ball[i][x] == 1){
+                    if(ball[i-1][x] == 1){
                         std::cout << 'H';
                     }
                     else{
@@ -47,8 +47,10 @@ void draw(){
 }
 
 int main(){
-    std::cout << "\x1b[?25l";
+    std::cout << "\x1b[?25l"; //hide cursor
+    std::cout << "\x1b[8;40;100t"; //set size rows ; col
 
+    //Graphics run
     while(true){
         draw();            
         if (_kbhit()) {           // check if a key was pressed
