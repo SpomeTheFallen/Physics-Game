@@ -5,24 +5,24 @@
 // 0 = air, 1 = ball, 2 = ball (texture)
 
 int ball[ballProp::rows][ballProp::cols] = {
-    0, 1, 1, 0,
+    0, 1, 2, 0,
     1, 0, 0, 1,
     1, 0, 0, 1,
-    0, 1, 1, 0,
+    0, 2, 1, 0,
 };
 
 int ballR1[ballProp::rows][ballProp::cols] = {
     0, 1, 1, 0,
-    1, 0, 0, 1,
-    1, 0, 0, 1,
-    0, 1, 1, 1,
+    1, 0, 0, 2,
+    2, 0, 0, 1,
+    0, 1, 1, 0,
 };
 
 int ballR2[ballProp::rows][ballProp::cols] = {
+    0, 2, 1, 0,
+    1, 0, 0, 1,
+    1, 0, 0, 2,
     0, 1, 1, 0,
-    1, 0, 0, 1,
-    1, 0, 0, 1,
-    1, 1, 1, 0,
 };
 //move signals
 bool signals::rolling_right1 = false;
