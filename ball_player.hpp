@@ -15,6 +15,7 @@ struct signals{
     static int rolling_counter;
 };
 
+bool checkRightCollisions();
 
 void move_right();
 

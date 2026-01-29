@@ -15,6 +15,7 @@ We set a barrier to bound the level, so we must shift the level's array by 1 in 
 To draw the ball, we check if the index we are on is its posistion relative to the terminal grid, then fill the line
 It is important to note, cursor posistion affects print and not the index, so they must be set to always match.
 */
+
 void draw(){
     std::cout << "\x1b[H";
     
@@ -45,8 +46,10 @@ void draw(){
                     else{
                         std::cout << ' ';
                     }
+
                     
                 }
+                
                 else if(signals::rolling_right2){
                     if(ballR2[i-ballPos::row][j-ballPos::col] == 1){
                         std::cout << 'H';
@@ -58,6 +61,7 @@ void draw(){
                         std::cout << ' ';
                     }
                 }
+                
                 else{
                     if(ball[i-ballPos::row][j-ballPos::col] == 1){
                         std::cout << 'H';
@@ -76,11 +80,11 @@ void draw(){
             }
         }
         //for animations to work row by row.
+        //right animation
         if(ballPos::row <= i && i < ballPos::row + ballProp::rows){
             if(signals::rolling_right1){
                 if(signals::rolling_counter < 4) signals::rolling_counter++;
-                else {
-                    ballPos::col += 1;
+                else {      
                     signals::rolling_right1 = false;
                     signals::rolling_counter = 0;
                     signals::rolling_right2 = true;
@@ -91,6 +95,7 @@ void draw(){
                 else{ signals::rolling_right2 = false;}
             }
         }
+        
         std::cout << '\n';
     }
 }

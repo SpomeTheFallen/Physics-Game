@@ -1,6 +1,6 @@
 #include "ball_player.hpp"
 #include "level_grids.hpp"
-
+#include <vector>
 
 // 0 = air, 1 = ball, 2 = ball (texture)
 
@@ -30,9 +30,28 @@ bool signals::rolling_right2 = false;
 int signals::rolling_counter = 0;
 
 //movement
+bool checkRightCollisions(){
+    std::vector<int> cols;
+
+    for(int i = ballPos::row; i < (ballPos::row + ballProp::rows) ; i++){
+        for(int j = ballPos::col ; j < l0Prop::cols; j++){
+            if(level0[i][j] == 1){
+                cols.push_back(j);
+            }
+        }
+    }
+    for(int col : cols){
+        if(!((ballPos::col + ballProp::cols) < (col))){
+            return false;
+        }
+    }
+    return true;
+}
+
+
 void move_right(){
-    if((ballPos::col + ballProp::cols) < (l0Prop::cols)){
-        ballPos::col += 1;
+    if(((ballPos::col + ballProp::cols + 1) < (l0Prop::cols)) && checkRightCollisions()){
+        ballPos::col += 2;
         signals::rolling_right1 = true;
     }
 }
