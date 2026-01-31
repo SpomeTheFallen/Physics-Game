@@ -14,16 +14,18 @@ int main(){
     
     //Graphics run
     while(true){
-        draw();      
-        
+        draw();     
+        //game loop (synced with key presses)
         if(std::chrono::steady_clock::now() >= nextKeyTime){
-            if (_kbhit()) {           // check if a key was pressed
-                char key = _getch();    // read the key without Enter
+            simulateGravity();
+
+            if(_kbhit()) {           // check if a key was pressed
+                char key = _getch();    
                 if(key == 'd') move_right();
                 else if (key == 'a') move_left();
                 else if (key == 'w') move_up();
-                else if (key == 's') move_down();
-                else if (key == 'q') break;  // quit
+                else if (key == 's') continue;
+                else if (key == 'q') break;  
                 nextKeyTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(200);
             }
         }

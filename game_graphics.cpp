@@ -34,7 +34,7 @@ void draw(){
             if(level0[i-1][j-1] == 1){
                 std::cout << 'x';
             }
-            //ball posistion
+            //ball posistion + animations
             else if((ballPos::col <= j && j < ballPos::col + ballProp::cols) && (ballPos::row <= i && i < ballPos::row + ballProp::rows) ){
                 if(signals::rolling_right1){
                     if(ballR1[i-ballPos::row][j-ballPos::col] == 1){
@@ -55,6 +55,28 @@ void draw(){
                         std::cout << 'H';
                     }
                     else if(ballR2[i-ballPos::row][j-ballPos::col] == 2){
+                        std::cout << '#';
+                    }
+                    else{
+                        std::cout << ' ';
+                    }
+                }
+                else if(signals::rolling_left1){
+                    if(ballR2[i-ballPos::row][j-ballPos::col] == 1){
+                        std::cout << 'H';
+                    }
+                    else if(ballR2[i-ballPos::row][j-ballPos::col] == 2){
+                        std::cout << '#';
+                    }
+                    else{
+                        std::cout << ' ';
+                    }
+                }
+                else if(signals::rolling_left2){
+                    if(ballR1[i-ballPos::row][j-ballPos::col] == 1){
+                        std::cout << 'H';
+                    }
+                    else if(ballR1[i-ballPos::row][j-ballPos::col] == 2){
                         std::cout << '#';
                     }
                     else{
@@ -94,6 +116,19 @@ void draw(){
                 if(signals::rolling_counter < 4) signals::rolling_counter++;
                 else{ signals::rolling_right2 = false;}
             }
+            else if(signals::rolling_left1){
+                if(signals::rolling_counter < 4) signals::rolling_counter++;
+                else {      
+                    signals::rolling_left1 = false;
+                    signals::rolling_counter = 0;
+                    signals::rolling_left2 = true;
+                }
+            }
+            else if(signals::rolling_left2){
+                if(signals::rolling_counter < 4) signals::rolling_counter++;
+                else{ signals::rolling_left2 = false;}
+            }
+
         }
         
         std::cout << '\n';
