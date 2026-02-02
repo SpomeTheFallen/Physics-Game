@@ -1,4 +1,4 @@
-#include "ball_player.hpp"
+#include "ball.hpp"
 #include "level_grids.hpp"
 
 // 0 = air, 1 = ball, 2 = ball (texture)
@@ -42,7 +42,7 @@ bool checkRightCollisions(){
         return false;
     }
     for(int i = ballPos::row; i < (ballPos::row + ballProp::rows-1) ; i++){
-        for(int j = ballPos::col ; j < ballPos::col + ballProp::cols + 1 ; j++){
+        for(int j = ballPos::col-1 ; j < ballPos::col-1 + ballProp::cols + 2 ; j++){
             if(level0[i][j] == 1){
                 return false;
             }
@@ -55,7 +55,7 @@ bool checkLeftCollisions(){
         return false;
     }
     for(int i = ballPos::row; i < (ballPos::row + ballProp::rows-1) ; i++){
-        for(int j = ballPos::col-2 ; j < ballPos::col ; j++){
+        for(int j = ballPos::col-1-2 ; j < ballPos::col ; j++){
             if(level0[i][j] == 1){
                 return false;
             }
@@ -68,7 +68,7 @@ bool checkGravityCollisions(int velocity){
         return false;
     }
     for(int i = ballPos::row; i < ballPos::row + ballProp::rows + velocity-1; i++){
-        for(int j = ballPos::col ; j < ballPos::col + ballProp::cols - 1 ; j++){
+        for(int j = ballPos::col - 1 ; j < ballPos::col + ballProp::cols - 1 ; j++){
             if(level0[i][j] == 1){
                 return false;
             }

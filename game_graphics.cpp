@@ -1,7 +1,8 @@
 #include <iostream>
 #include "level_grids.hpp"
-#include "ball_player.hpp"
+#include "ball.hpp"
 #include "game_graphics.hpp"
+#include "player_system.hpp"
 
 void readyTerminal(){
     std::cout << "\x1b[?25l"; //hide cursor
@@ -19,17 +20,37 @@ It is important to note, cursor posistion affects print and not the index, so th
 void draw(){
     std::cout << "\x1b[H";
     
-    for(int i = 0; i < l0Prop::rows+1 ; i++){
-        for(int j = 0 ; j < l0Prop::cols+1; j++){
+    for(int i = 0; i < l0Prop::rows+2 ; i++){
+        for(int j = 0 ; j < l0Prop::cols+6; j++){
+
+            //energy bar
+            if(j > l0Prop::cols){
+                if(energyBarPos::row <= i && i < energyBarPos::row + 10){
+                    if(j == energyBarPos::col-1){
+                        std::cout << '[';
+                    }
+                    else if(j == energyBarPos::col + 1){
+                        std::cout << ']';
+                    }
+                    else if(j == energyBarPos::col){
+                        std::cout << '%';
+                    }
+                    else{
+                        std::cout << ' ';
+                    }
+                }
+                continue;
+            }
+
             //auto barrier
-            if(i == 0 || i == l0Prop::rows){
+            if(i == 0 || i == l0Prop::rows+1){
                 std::cout << 'x';
                 continue;
             }
-            if(j == 0 || j == l0Prop::cols){
+            if(j == 0 || j == l0Prop::cols+1){
                 std::cout << 'x';
                 continue;
-            }
+            }    
             //level design
             if(level0[i-1][j-1] == 1){
                 std::cout << 'x';
@@ -102,8 +123,8 @@ void draw(){
             }
         }
         //for animations to work row by row.
-        //right animation
         if(ballPos::row <= i && i < ballPos::row + ballProp::rows){
+            //right animation
             if(signals::rolling_right1){
                 if(signals::rolling_counter < 4) signals::rolling_counter++;
                 else {      
@@ -116,6 +137,7 @@ void draw(){
                 if(signals::rolling_counter < 4) signals::rolling_counter++;
                 else{ signals::rolling_right2 = false;}
             }
+            //left animation
             else if(signals::rolling_left1){
                 if(signals::rolling_counter < 4) signals::rolling_counter++;
                 else {      

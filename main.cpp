@@ -2,7 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <conio.h>
-#include "ball_player.hpp"
+#include "ball.hpp"
 #include "game_graphics.hpp"
 
 auto nextKeyTime = std::chrono::steady_clock::now();
@@ -15,16 +15,16 @@ int main(){
     //Graphics run
     while(true){
         draw();     
+        simulateGravity();
         //game loop (synced with key presses)
         if(std::chrono::steady_clock::now() >= nextKeyTime){
-            simulateGravity();
-
             if(_kbhit()) {           // check if a key was pressed
                 char key = _getch();    
                 if(key == 'd') move_right();
                 else if (key == 'a') move_left();
                 else if (key == 'w') move_up();
                 else if (key == 's') continue;
+                else if (key == 'e') {ballPos::row = 1 ; ballPos::col = 1;}
                 else if (key == 'q') break;  
                 nextKeyTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(200);
             }
