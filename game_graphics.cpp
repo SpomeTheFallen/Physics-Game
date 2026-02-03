@@ -2,7 +2,6 @@
 #include "level_grids.hpp"
 #include "ball.hpp"
 #include "game_graphics.hpp"
-#include "player_system.hpp"
 
 void readyTerminal(){
     std::cout << "\x1b[?25l"; //hide cursor
@@ -25,14 +24,14 @@ void draw(){
 
             //energy bar
             if(j > l0Prop::cols){
-                if(energyBarPos::row <= i && i < energyBarPos::row + 10){
-                    if(j == energyBarPos::col-1){
+                if(energyBar::row <= i && i < energyBar::row + 10){
+                    if(j == energyBar::col-1){
                         std::cout << '[';
                     }
-                    else if(j == energyBarPos::col + 1){
+                    else if(j == energyBar::col + 1){
                         std::cout << ']';
                     }
-                    else if(j == energyBarPos::col){
+                    else if(j == energyBar::col && energyBar::bar[i-3] == 1){
                         std::cout << '%';
                     }
                     else{

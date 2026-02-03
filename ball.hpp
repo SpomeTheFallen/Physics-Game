@@ -1,6 +1,8 @@
 namespace ballProp{
     const int rows = 4;
     const int cols = 4;
+    extern int velocityX;
+    extern int velocityY;
     extern int velocityZ; 
 }
 
@@ -19,15 +21,26 @@ struct signals{
     static bool rolling_left2;
 };
 
+namespace energyBar{
+    const int col = 79;
+    const int row = 3;
+    extern int internal;
+    extern int bar[10];
+}
+
+void transferEnergy(int velocityChange);
+
 bool checkGravityCollisions(int velocity);
 
-void move_right();
+void accelerate_right();
 
-void move_left();
+void accelerate_left();
 
 void move_up();
 
 void simulateGravity();
+
+void simulateMovement();
 
 extern int ball[ballProp::rows][ballProp::cols];
 extern int ballR1[ballProp::rows][ballProp::cols];

@@ -16,12 +16,13 @@ int main(){
     while(true){
         draw();     
         simulateGravity();
+        simulateMovement();
         //game loop (synced with key presses)
         if(std::chrono::steady_clock::now() >= nextKeyTime){
             if(_kbhit()) {           // check if a key was pressed
                 char key = _getch();    
-                if(key == 'd') move_right();
-                else if (key == 'a') move_left();
+                if(key == 'd') accelerate_right();
+                else if (key == 'a') accelerate_left();
                 else if (key == 'w') move_up();
                 else if (key == 's') continue;
                 else if (key == 'e') {ballPos::row = 1 ; ballPos::col = 1;}
