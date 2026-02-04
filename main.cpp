@@ -15,7 +15,6 @@ int main(){
     //Graphics run
     while(true){
         draw();     
-        simulateGravity();
         simulateMovement();
         //game loop (synced with key presses)
         if(std::chrono::steady_clock::now() >= nextKeyTime){

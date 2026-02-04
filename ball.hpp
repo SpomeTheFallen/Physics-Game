@@ -38,8 +38,6 @@ void accelerate_left();
 
 void move_up();
 
-void simulateGravity();
-
 void simulateMovement();
 
 extern int ball[ballProp::rows][ballProp::cols];

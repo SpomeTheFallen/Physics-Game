@@ -85,7 +85,7 @@ bool checkLeftCollisions(){
     return true;
 }
 bool checkGravityCollisions(int velocity){
-    if(!((ballPos::row + ballProp::rows + velocity-1 ) < (l0Prop::rows))){
+    if(!((ballPos::row + ballProp::rows-1 + velocity ) < (l0Prop::rows+1))){
         return false;
     }
     for(int i = ballPos::row; i < ballPos::row + ballProp::rows + velocity-1; i++){
@@ -104,10 +104,8 @@ void accelerate_right(){
 }
 
 void accelerate_left(){
-    if(checkLeftCollisions()){
-        ballPos::col -= 2;
-        signals::rolling_left1 = true; 
-    }
+    ballProp::velocityX -= 2;
+    transferEnergy(2);
 }
 
 void move_up(){
@@ -126,8 +124,7 @@ void simulateGravity(){
         ballProp::velocityZ > 0 ? ballProp::velocityZ -= 1 : ballProp::velocityZ = 0;
     }
 }
-
-void simulateMovement(){
+void simulateHorizontalMovement(){
     if(ballProp::velocityX > 0){
         if(checkRightCollisions()){        
             ballPos::col += ballProp::velocityX;
@@ -135,4 +132,16 @@ void simulateMovement(){
         }
         ballProp::velocityX -= 1;
     }   
+    else if(ballProp::velocityX < 0){
+        if(checkLeftCollisions()){        
+            ballPos::col += ballProp::velocityX;
+            signals::rolling_left1 = true;
+        }
+        ballProp::velocityX += 1;
+    }
+};
+
+void simulateMovement(){
+    simulateGravity();
+    simulateHorizontalMovement();
 }
