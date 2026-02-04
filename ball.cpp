@@ -1,5 +1,6 @@
 #include "ball.hpp"
 #include "level_grids.hpp"
+#include <iostream>
 
 // 0 = air, 1 = ball, 2 = ball (texture)
 
@@ -31,14 +32,18 @@ int energyBar::bar[10] = {1,1,1,1,1,1,1,1,1,1};
 
 void transferEnergy(int velocityChange){
     int energyChange;
-    energyChange = 1/2 * velocityChange*velocityChange;
+    energyChange =  (velocityChange*velocityChange)/2;
     energyBar::internal -= energyChange;
+    std::cout << energyBar::internal;
+    std::cout << energyChange;
+    std::cout << velocityChange;
     
-    for(int i = 10 ; i <= 100 ; i+=10){
-        if(energyBar::internal < (100 - i)){
-            energyBar::bar[(i/10) - 1] = 0;
+    for(int i = 0 ; i < 100 ; i+=10){
+        if(energyBar::internal < (90 - i)){
+            energyBar::bar[(i/10)] = 0;
         }
     }
+
 }
 
 
