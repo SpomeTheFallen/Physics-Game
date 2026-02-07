@@ -21,6 +21,20 @@ struct signals{
     static bool rolling_left2;
 };
 
+enum class direction{
+    left,
+    right
+};
+
+namespace forceBar{
+    const int row = 15;
+    const int col = 79;
+    extern int xForce;
+    extern int yForce;
+    extern int force;
+    extern int bar[10];
+}
+
 namespace energyBar{
     const int col = 79;
     const int row = 3;

@@ -1,6 +1,7 @@
 #include "ball.hpp"
 #include "level_grids.hpp"
-#include <iostream>
+#include <math.h>
+#include <vector>
 
 // 0 = air, 1 = ball, 2 = ball (texture)
 
@@ -34,15 +35,54 @@ void transferEnergy(int velocityChange){
     int energyChange;
     energyChange =  (velocityChange*velocityChange)/2;
     energyBar::internal -= energyChange;
-    std::cout << energyBar::internal;
-    std::cout << energyChange;
-    std::cout << velocityChange;
     
     for(int i = 0 ; i < 100 ; i+=10){
         if(energyBar::internal < (90 - i)){
             energyBar::bar[(i/10)] = 0;
         }
     }
+
+}
+//force ; F = a (since m = 1)
+int forceBar::force = 0;
+int forceBar::xForce = 0;
+int forceBar::yForce = 0;
+int forceBar::bar[10] = {0,0,0,0,0,0,0,0,0,0};
+
+void chargeForce(direction dir){
+    switch (dir){
+        case direction::left: 
+            forceBar::xForce -= 2; 
+        case direction::right: 
+            forceBar::xForce += 2;
+    }
+
+    int temp;
+    temp = sqrt(forceBar::xForce*forceBar::xForce + forceBar::yForce*forceBar::yForce);
+    if(temp > 100){
+        forceBar::force = 100;
+    }
+    else{
+        forceBar::force = temp;
+    }
+
+    for(int i = 0 ; i < 100 ; i+=10){
+        if(forceBar::force > (0 + i)){
+            forceBar::bar[(i/10)] = 1;
+        }
+    }
+}
+
+void executeForce(std::vector<direction> dirs){
+    forceBar::force = 0;
+    for(int i = 0 ; i < 10 ; i++){
+        forceBar::bar[i] = 0;
+    }
+
+    /*Rn, thinking of checking a vector of directions to see how many times a force was applied in such direction
+        then calculate the final direction
+        and apply acceleration accordingly for the x and y values
+    */
 
 }
 
@@ -102,6 +142,7 @@ bool checkGravityCollisions(int velocity){
     }
     return true;
 }
+
 
 void accelerate_right(){
     ballProp::velocityX += 2; 
