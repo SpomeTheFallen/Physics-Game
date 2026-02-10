@@ -1,7 +1,6 @@
 #include "ball.hpp"
 #include "level_grids.hpp"
 #include <math.h>
-#include <vector>
 
 // 0 = air, 1 = ball, 2 = ball (texture)
 
@@ -48,42 +47,44 @@ int forceBar::force = 0;
 int forceBar::xForce = 0;
 int forceBar::yForce = 0;
 int forceBar::bar[10] = {0,0,0,0,0,0,0,0,0,0};
+int temp_xForce = 0;
+int temp_force = 0;
+int temp_yForce = 0;
 
 void chargeForce(direction dir){
     switch (dir){
         case direction::left: 
-            forceBar::xForce -= 2; 
+            temp_xForce = forceBar::xForce - 1; 
         case direction::right: 
-            forceBar::xForce += 2;
+            temp_xForce = forceBar::xForce + 1;
     }
-
-    int temp;
-    temp = sqrt(forceBar::xForce*forceBar::xForce + forceBar::yForce*forceBar::yForce);
-    if(temp > 100){
-        forceBar::force = 100;
+    
+    temp_force = sqrt(temp_xForce*temp_xForce + temp_yForce*temp_yForce);
+    if(temp_force > 10){
+        forceBar::force = 10;
     }
     else{
-        forceBar::force = temp;
+        forceBar::force = temp_force;
+        forceBar::xForce = temp_xForce;
+        forceBar::yForce = temp_yForce;
+        
     }
 
-    for(int i = 0 ; i < 100 ; i+=10){
-        if(forceBar::force > (0 + i)){
-            forceBar::bar[(i/10)] = 1;
+    for(int i = 0 ; i < 10 ; i++){
+        if(forceBar::force > (9 - i)){
+            forceBar::bar[(i)] = 1;
         }
     }
 }
-
-void executeForce(std::vector<direction> dirs){
+//we will assume the force gets executed in 1 millisecond, so the resultant change in velocity = acceleration = force.
+void executeForce(){
     forceBar::force = 0;
     for(int i = 0 ; i < 10 ; i++){
         forceBar::bar[i] = 0;
     }
-
-    /*Rn, thinking of checking a vector of directions to see how many times a force was applied in such direction
-        then calculate the final direction
-        and apply acceleration accordingly for the x and y values
-    */
-
+    ballProp::velocityX += forceBar::xForce; 
+    transferEnergy(forceBar::xForce);
+    forceBar::xForce = 0;
 }
 
 
@@ -96,11 +97,15 @@ int signals::rolling_counter = 0;
 //velocities
 int ballProp::velocityX = 0;
 int ballProp::velocityY = 0;
-int ballProp::velocityZ = 0;
+int ballProp::accelerationX = 0;
+int ballProp::accelerationY = 0;
 
 /*movement
 For collision checks, ballPos = pos relative to terminal
 Level array is shifted to the left and up compared to terminal
+1 unit = 1 meter
+Acceleration is in unit/millisecond^2;
+Velocity is in unit/millisecond; 
 */
 
 bool checkRightCollisions(){
@@ -144,16 +149,6 @@ bool checkGravityCollisions(int velocity){
 }
 
 
-void accelerate_right(){
-    ballProp::velocityX += 2; 
-    transferEnergy(2);
-}
-
-void accelerate_left(){
-    ballProp::velocityX -= 2;
-    transferEnergy(2);
-}
-
 void move_up(){
     if(ballPos::row > 1){
         ballPos::row -= 1;
@@ -161,33 +156,47 @@ void move_up(){
 }
 //1 unit = 5 m ; g = 10m/s^2 ; 
 void simulateGravity(){
-    if(checkGravityCollisions(ballProp::velocityZ)){
-        ballPos::row += ballProp::velocityZ;
-        ballProp::velocityZ += 2;
+    if(checkGravityCollisions(ballProp::velocityY)){
+        ballPos::row += ballProp::velocityY;
+        ballProp::velocityY += 2;
     }
     else{
         //Lower unit movement to account for any leftover space between ball and ground.
-        ballProp::velocityZ > 0 ? ballProp::velocityZ -= 1 : ballProp::velocityZ = 0;
+        ballProp::velocityY > 0 ? ballProp::velocityY -= 1 : ballProp::velocityY = 0;
     }
 }
-void simulateHorizontalMovement(){
+//time in milliseconds
+void simulateHorizontalMovement(int ellapsedTime){
+    
+    ballProp::velocityX += ballProp::accelerationX * ellapsedTime;
+    transferEnergy(ballProp::accelerationX * ellapsedTime);
+
+    //friction
+    if(ballProp::velocityX > 0){
+        ballProp::accelerationX -= 1*ellapsedTime;
+    }
+    else if (ballProp::velocityX < 0){
+        ballProp::accelerationX += 1*ellapsedTime;
+    }
+    else if (ballProp::velocityX == 0){
+        ballProp::accelerationX = 0;
+    }
+    
     if(ballProp::velocityX > 0){
         if(checkRightCollisions()){        
-            ballPos::col += ballProp::velocityX;
+            ballPos::col += ballProp::velocityX * ellapsedTime;
             signals::rolling_right1 = true;
         }
-        ballProp::velocityX -= 1;
     }   
     else if(ballProp::velocityX < 0){
         if(checkLeftCollisions()){        
-            ballPos::col += ballProp::velocityX;
+            ballPos::col += ballProp::velocityX * ellapsedTime;
             signals::rolling_left1 = true;
         }
-        ballProp::velocityX += 1;
     }
 };
 
-void simulateMovement(){
+void simulateMovement(int ellapsedTime){
     simulateGravity();
-    simulateHorizontalMovement();
+    simulateHorizontalMovement(ellapsedTime);
 }

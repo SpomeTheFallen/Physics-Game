@@ -3,7 +3,8 @@ namespace ballProp{
     const int cols = 4;
     extern int velocityX;
     extern int velocityY;
-    extern int velocityZ; 
+    extern int accelerationX;
+    extern int accelerationY;
 }
 
 //marks the balls highest and most left points relative to terminal grid.
@@ -46,13 +47,13 @@ void transferEnergy(int velocityChange);
 
 bool checkGravityCollisions(int velocity);
 
-void accelerate_right();
+void chargeForce(direction dir);
 
-void accelerate_left();
+void executeForce();
 
 void move_up();
 
-void simulateMovement();
+void simulateMovement(int ellapsedTime);
 
 extern int ball[ballProp::rows][ballProp::cols];
 extern int ballR1[ballProp::rows][ballProp::cols];

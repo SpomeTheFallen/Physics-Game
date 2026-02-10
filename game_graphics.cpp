@@ -22,7 +22,7 @@ void draw(){
     for(int i = 0; i < l0Prop::rows+2 ; i++){
         for(int j = 0 ; j < l0Prop::cols+6; j++){
 
-            //energy bar
+            //energy bar & force bar
             if(j > l0Prop::cols){
                 if(energyBar::row <= i && i < energyBar::row + 10){
                     if(j == energyBar::col-1){
@@ -33,6 +33,20 @@ void draw(){
                     }
                     else if(j == energyBar::col && energyBar::bar[i-3] == 1){
                         std::cout << '%';
+                    }
+                    else{
+                        std::cout << ' ';
+                    }
+                }
+                if(forceBar::row <= i && i < forceBar::row + 10){
+                    if(j == forceBar::col-1){
+                        std::cout << '[';
+                    }
+                    else if(j == forceBar::col + 1){
+                        std::cout << ']';
+                    }
+                    else if(j == forceBar::col && forceBar::bar[i-15] == 1){
+                        std::cout << '@';
                     }
                     else{
                         std::cout << ' ';
