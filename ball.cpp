@@ -47,32 +47,33 @@ int forceBar::force = 0;
 int forceBar::xForce = 0;
 int forceBar::yForce = 0;
 int forceBar::bar[10] = {0,0,0,0,0,0,0,0,0,0};
-int temp_xForce = 0;
-int temp_force = 0;
-int temp_yForce = 0;
+
 
 void chargeForce(direction dir){
+    int temp_xForce = 0;
+    int temp_yForce = 0;
     switch (dir){
         case direction::left: 
-            temp_xForce = forceBar::xForce - 1; 
+            temp_xForce = forceBar::xForce + -1; 
+            break;
         case direction::right: 
             temp_xForce = forceBar::xForce + 1;
+            break;
     }
     
-    temp_force = sqrt(temp_xForce*temp_xForce + temp_yForce*temp_yForce);
-    if(temp_force > 10){
-        forceBar::force = 10;
-    }
-    else{
+    int temp_force = sqrt(temp_xForce*temp_xForce + temp_yForce*temp_yForce);
+    if(temp_force <= 10){
         forceBar::force = temp_force;
         forceBar::xForce = temp_xForce;
         forceBar::yForce = temp_yForce;
-        
     }
 
     for(int i = 0 ; i < 10 ; i++){
         if(forceBar::force > (9 - i)){
-            forceBar::bar[(i)] = 1;
+            forceBar::bar[i] = 1;
+        }
+        else{
+            forceBar::bar[i] = 0;
         }
     }
 }
@@ -173,10 +174,10 @@ void simulateHorizontalMovement(int ellapsedTime){
 
     //friction
     if(ballProp::velocityX > 0){
-        ballProp::accelerationX -= 1*ellapsedTime;
+        ballProp::accelerationX = -1;
     }
     else if (ballProp::velocityX < 0){
-        ballProp::accelerationX += 1*ellapsedTime;
+        ballProp::accelerationX = 1;
     }
     else if (ballProp::velocityX == 0){
         ballProp::accelerationX = 0;
