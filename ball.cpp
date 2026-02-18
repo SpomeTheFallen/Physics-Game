@@ -1,6 +1,7 @@
 #include "ball.hpp"
 #include "level_grids.hpp"
 #include <math.h>
+#include <iostream>
 
 // 0 = air, 1 = ball, 2 = ball (texture)
 
@@ -42,7 +43,29 @@ void transferEnergy(int velocityChange){
     }
 
 }
-//force ; F = a (since m = 1)
+//force 
+
+//2 = compass border, 1 = vector, 0 = space
+int forceCompass::forceUnitVector[5][5] = {
+    0, 2, 2, 2, 0,
+    2, 0, 0, 0, 2,
+    2, 0, 1, 0, 2,
+    2, 0, 0, 0, 2,
+    0, 2, 2, 2, 0,
+};
+
+void resetVector(){
+    forceCompass::forceUnitVector[1][1] = 0;
+    forceCompass::forceUnitVector[1][2] = 0;
+    forceCompass::forceUnitVector[1][3] = 0;
+    forceCompass::forceUnitVector[2][1] = 0;
+    forceCompass::forceUnitVector[2][3] = 0;
+    forceCompass::forceUnitVector[3][1] = 0;
+    forceCompass::forceUnitVector[3][2] = 0;
+    forceCompass::forceUnitVector[3][3] = 0;
+}
+
+// F = a (since m = 1)
 int forceBar::force = 0;
 int forceBar::xForce = 0;
 int forceBar::yForce = 0;
@@ -76,6 +99,7 @@ void chargeForce(direction dir){
             forceBar::bar[i] = 0;
         }
     }
+
 }
 //we will assume the force gets executed in 1 millisecond, so the resultant change in velocity = acceleration = force.
 void executeForce(){
@@ -135,7 +159,7 @@ bool checkLeftCollisions(){
     }
     return true;
 }
-bool checkGravityCollisions(int velocity){
+bool checkDownCollisions(int velocity){
     if(!((ballPos::row + ballProp::rows-1 + velocity ) < (l0Prop::rows+1))){
         return false;
     }
@@ -155,22 +179,32 @@ void move_up(){
         ballPos::row -= 1;
     }
 }
+
+
 //1 unit = 5 m ; g = 10m/s^2 ; 
-void simulateGravity(){
-    if(checkGravityCollisions(ballProp::velocityY)){
-        ballPos::row += ballProp::velocityY;
-        ballProp::velocityY += 2;
+void simulateVerticalMovement(int ellapsedTime){
+    ballProp::velocityY += ballProp::accelerationY * ellapsedTime;
+
+    // gravity
+    if(checkDownCollisions(ballProp::velocityY)){
+        ballProp::accelerationY = -10; 
     }
     else{
-        //Lower unit movement to account for any leftover space between ball and ground.
-        ballProp::velocityY > 0 ? ballProp::velocityY -= 1 : ballProp::velocityY = 0;
+        ballProp::accelerationY < 0 ? ballProp::accelerationY += 1 : ballProp::accelerationY = 0;
+    }
+
+    if(ballProp::velocityY < 0){
+        if(checkDownCollisions(ballProp::velocityY)){        
+            ballPos::col += ballProp::velocityX * ellapsedTime;
+            signals::rolling_left1 = true;
+        }
     }
 }
+
 //time in milliseconds
 void simulateHorizontalMovement(int ellapsedTime){
     
     ballProp::velocityX += ballProp::accelerationX * ellapsedTime;
-    transferEnergy(ballProp::accelerationX * ellapsedTime);
 
     //friction
     if(ballProp::velocityX > 0){
@@ -198,6 +232,33 @@ void simulateHorizontalMovement(int ellapsedTime){
 };
 
 void simulateMovement(int ellapsedTime){
-    simulateGravity();
+    //using unit circle, find the direction in rad or degree of force to then map it on a compass
+    int theta = std::atan2(forceBar::yForce, forceBar::xForce) * (180/(2*M_PI)); 
+    std::cout << theta;
+    resetVector();
+    switch (theta){
+        case 0:
+            forceCompass::forceUnitVector[2][3] = 1;
+            break;
+        case 90: 
+            forceCompass::forceUnitVector[1][2] = 1;
+            break;
+        case 180:
+            forceCompass::forceUnitVector[2][1] = 1;
+            break;
+        case 270:
+            forceCompass::forceUnitVector[3][2] = 1;
+            break;
+        default:
+            if(theta > 0 && theta < 90)
+                forceCompass::forceUnitVector[1][3] = 1;
+            else if(theta < 180)
+                forceCompass::forceUnitVector[1][1] = 1;
+            else if(theta < 270 )
+                forceCompass::forceUnitVector[3][1] = 1;
+            else if(theta > 270)
+                forceCompass::forceUnitVector[3][3] = 1;
+    }
+    simulateVerticalMovement(ellapsedTime);
     simulateHorizontalMovement(ellapsedTime);
 }

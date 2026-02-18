@@ -15,7 +15,7 @@ int main(){
     //Graphics run
     while(true){
         draw();     
-        simulateMovement(1);
+        simulateMovement();
         //game loop (synced with key presses)
         if(std::chrono::steady_clock::now() >= nextKeyTime){
             if(_kbhit()) {           // check if a key was pressed

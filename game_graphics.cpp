@@ -20,7 +20,7 @@ void draw(){
     std::cout << "\x1b[H";
     
     for(int i = 0; i < l0Prop::rows+2 ; i++){
-        for(int j = 0 ; j < l0Prop::cols+6; j++){
+        for(int j = 0 ; j < 86; j++){
 
             //energy bar & force bar
             if(j > l0Prop::cols){
@@ -52,6 +52,21 @@ void draw(){
                         std::cout << ' ';
                     }
                 }
+                if(forceCompass::row <= i && i < 5 + forceCompass::row){
+                    if(j >= forceCompass::col){
+                        switch(forceCompass::forceUnitVector[i-forceCompass::row][j-forceCompass::col]){
+                            case 2:
+                                std::cout << 'O';
+                                break;
+                            case 1:
+                                std::cout << '+';
+                                break;
+                            case 0:
+                                std::cout << ' ';
+                        }        
+                    }
+                }
+                
                 continue;
             }
 

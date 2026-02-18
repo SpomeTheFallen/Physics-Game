@@ -34,6 +34,13 @@ namespace forceBar{
     extern int yForce;
     extern int force;
     extern int bar[10];
+    
+}
+
+namespace forceCompass{
+    const int row = 30;
+    const int col = 81;
+    extern int forceUnitVector[5][5];
 }
 
 namespace energyBar{
@@ -45,15 +52,13 @@ namespace energyBar{
 
 void transferEnergy(int velocityChange);
 
-bool checkGravityCollisions(int velocity);
-
 void chargeForce(direction dir);
 
 void executeForce();
 
 void move_up();
 
-void simulateMovement(int ellapsedTime);
+void simulateMovement(int ellapsedTime = 1);
 
 extern int ball[ballProp::rows][ballProp::cols];
 extern int ballR1[ballProp::rows][ballProp::cols];
