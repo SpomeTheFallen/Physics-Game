@@ -163,7 +163,7 @@ bool checkDownCollisions(int velocity){
     if(!((ballPos::row + ballProp::rows-1 + velocity ) < (l0Prop::rows+1))){
         return false;
     }
-    for(int i = ballPos::row; i < ballPos::row + ballProp::rows + velocity-1; i++){
+    for(int i = ballPos::row; i < ballPos::row + ballProp::rows-1 + velocity; i++){
         for(int j = ballPos::col - 1 ; j < ballPos::col + ballProp::cols - 1 ; j++){
             if(level0[i][j] == 1){
                 return false;
@@ -181,24 +181,38 @@ void move_up(){
 }
 
 
-//1 unit = 5 m ; g = 10m/s^2 ; 
+//1 unit = 5 m ; g = 10m/s^2; 
 void simulateVerticalMovement(int ellapsedTime){
     ballProp::velocityY += ballProp::accelerationY * ellapsedTime;
-
+    
     // gravity
-    if(checkDownCollisions(ballProp::velocityY)){
-        ballProp::accelerationY = -10; 
+    if(checkDownCollisions(1)){
+        ballProp::accelerationY = 2; 
     }
     else{
-        ballProp::accelerationY < 0 ? ballProp::accelerationY += 1 : ballProp::accelerationY = 0;
+        ballProp::velocityY > 0 ? ballProp::accelerationY -= 1 : ballProp::accelerationY = 0;
     }
 
-    if(ballProp::velocityY < 0){
-        if(checkDownCollisions(ballProp::velocityY)){        
-            ballPos::col += ballProp::velocityX * ellapsedTime;
-            signals::rolling_left1 = true;
+    if(ballProp::velocityY > 0){
+        if(checkDownCollisions(ballProp::velocityY)){       
+            ballPos::row += ballProp::velocityY * ellapsedTime;
+        }
+        else{
+            int reboundVelocity = 0;
+            while(!checkDownCollisions(ballProp::velocityY)){
+                ballProp::velocityY -= 1;
+                reboundVelocity += 1;
+            }
+            ballPos::row += ballProp::velocityY *ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityY = -reboundVelocity/2;
         }
     }
+    else if(ballProp::velocityY < 0){
+        ballPos::row += -1 * ellapsedTime;
+        return;
+    }
+      
 }
 
 //time in milliseconds
@@ -231,10 +245,26 @@ void simulateHorizontalMovement(int ellapsedTime){
     }
 };
 
+int arctan(int y, int x){
+    int theta = 0;
+    if(x != 0){
+        int theta = std::atan(y/x) * (180/(2*M_PI));
+    }
+   
+    if(x < 0){
+        theta += 180;
+    }
+    if(y < 0){
+        theta += 360;
+    }
+    return theta;
+}
+
+
 void simulateMovement(int ellapsedTime){
     //using unit circle, find the direction in rad or degree of force to then map it on a compass
-    int theta = std::atan2(forceBar::yForce, forceBar::xForce) * (180/(2*M_PI)); 
-    std::cout << theta;
+    int theta = arctan(ballProp::accelerationY, ballProp::accelerationX);
+
     resetVector();
     switch (theta){
         case 0:
