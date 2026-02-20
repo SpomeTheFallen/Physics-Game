@@ -23,7 +23,7 @@ int main(){
                 if(key == 'd') chargeForce(direction::right);
                 else if (key == 'a') chargeForce(direction::left);
                 else if (key == 'w') move_up();
-                else if (key == 's') continue;
+                else if (key == 's') chargeForce(direction::compress);
                 else if (key == 'e') executeForce();
                 else if (key == 'r') {ballPos::row = 1 ; ballPos::col = 1;}
                 else if (key == 'q') break;  

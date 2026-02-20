@@ -94,9 +94,7 @@ void draw(){
                     }
                     else{
                         std::cout << ' ';
-                    }
-
-                    
+                    } 
                 }
                 
                 else if(signals::rolling_right2){
@@ -131,6 +129,28 @@ void draw(){
                     else{
                         std::cout << ' ';
                     }
+                }
+                else if(signals::springed1){
+                    if(ballSpringed1[i-ballPos::row][j-ballPos::col] == 1){
+                        std::cout << 'H';
+                    }
+                    else if(ballSpringed1[i-ballPos::row][j-ballPos::col] == 2){
+                        std::cout << '#';
+                    }
+                    else{
+                        std::cout << ' ';
+                    }      
+                }
+                else if(signals::springed2){
+                    if(ballSpringed2[i-ballPos::row][j-ballPos::col] == 1){
+                        std::cout << 'H';
+                    }
+                    else if(ballSpringed2[i-ballPos::row][j-ballPos::col] == 2){
+                        std::cout << '#';
+                    }
+                    else{
+                        std::cout << ' ';
+                    }  
                 }
                 
                 else{

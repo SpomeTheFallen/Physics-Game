@@ -26,6 +26,22 @@ int ballR2[ballProp::rows][ballProp::cols] = {
     0, 1, 1, 0,
 };
 
+int ballSpringed1[ballProp::rows][ballProp::cols] = {
+    0, 0, 0, 0,
+    1, 1, 2, 1,
+    1, 0, 0, 1,
+    0, 2, 1, 0,
+};
+
+int ballSpringed2[ballProp::rows][ballProp::cols] = {
+    0, 0, 0, 0,
+    1, 0, 0, 1,
+    1, 1, 2, 1,
+    0, 2, 1, 0,
+};
+
+
+
 //energy
 int energyBar::internal = 100;
 
@@ -73,22 +89,36 @@ int forceBar::bar[10] = {0,0,0,0,0,0,0,0,0,0};
 
 
 void chargeForce(direction dir){
-    int temp_xForce = 0;
-    int temp_yForce = 0;
+    int temp_xForce = forceBar::xForce;
+    int temp_yForce = forceBar::yForce;
     switch (dir){
         case direction::left: 
-            temp_xForce = forceBar::xForce + -1; 
+            temp_xForce --;
             break;
         case direction::right: 
-            temp_xForce = forceBar::xForce + 1;
+            temp_xForce ++;
+            break;
+        case direction::compress:
+            //Simplified hookes law, by compressing the ball/spring, restoring force is +=1 per compression.
+            temp_yForce ++;
             break;
     }
     
-    int temp_force = sqrt(temp_xForce*temp_xForce + temp_yForce*temp_yForce);
-    if(temp_force <= 10){
+    int temp_force = round(sqrt(temp_xForce*temp_xForce + temp_yForce*temp_yForce));
+    if(temp_force <= 10 && temp_force <= energyBar::internal){
         forceBar::force = temp_force;
         forceBar::xForce = temp_xForce;
         forceBar::yForce = temp_yForce;
+
+        if (forceBar::yForce > 3){
+            signals::springed2 = true;
+            signals::springed1 = false;
+        }
+        else if(forceBar::yForce > 0){
+            signals::springed1 = true;
+            signals::springed2 = false;
+        }
+
     }
 
     for(int i = 0 ; i < 10 ; i++){
@@ -103,14 +133,23 @@ void chargeForce(direction dir){
 }
 //we will assume the force gets executed in 1 millisecond, so the resultant change in velocity = acceleration = force.
 void executeForce(){
+    signals::springed1 = false;
+    signals::springed2 = false;
+
+    ballProp::velocityX += forceBar::xForce; 
+    ballProp::velocityY += forceBar::yForce;
+    transferEnergy(forceBar::force);
+
+    forceBar::xForce = 0;
+    forceBar::yForce = 0;
+
     forceBar::force = 0;
     for(int i = 0 ; i < 10 ; i++){
         forceBar::bar[i] = 0;
     }
-    ballProp::velocityX += forceBar::xForce; 
-    transferEnergy(forceBar::xForce);
-    forceBar::xForce = 0;
 }
+
+
 
 
 //move signals
@@ -118,6 +157,8 @@ bool signals::rolling_right1 = false;
 bool signals::rolling_right2 = false;
 bool signals::rolling_left1 = false;
 bool signals::rolling_left2 = false;
+bool signals::springed1 = false;
+bool signals::springed2 = false;
 int signals::rolling_counter = 0;
 //velocities
 int ballProp::velocityX = 0;
@@ -133,12 +174,13 @@ Acceleration is in unit/millisecond^2;
 Velocity is in unit/millisecond; 
 */
 
-bool checkRightCollisions(){
-    if(!((ballPos::col + ballProp::cols + 1) < (l0Prop::cols))){
+//pass the absolute value of velocity for each collision check
+bool checkRightCollisions(int velocity){
+    if(!((ballPos::col + ballProp::cols-1 + velocity) < (l0Prop::cols))){
         return false;
     }
     for(int i = ballPos::row; i < (ballPos::row + ballProp::rows-1) ; i++){
-        for(int j = ballPos::col-1 ; j < ballPos::col-1 + ballProp::cols + 2 ; j++){
+        for(int j = ballPos::col-1 ; j < ballPos::col-1 + ballProp::cols + velocity ; j++){
             if(level0[i][j] == 1){
                 return false;
             }
@@ -146,12 +188,13 @@ bool checkRightCollisions(){
     }
     return true;
 }
-bool checkLeftCollisions(){
-    if(!(ballPos::col > 2)){
+
+bool checkLeftCollisions(int velocity){
+    if(!(ballPos::col > velocity)){
         return false;
     }
     for(int i = ballPos::row; i < (ballPos::row + ballProp::rows-1) ; i++){
-        for(int j = ballPos::col-1-2 ; j < ballPos::col ; j++){
+        for(int j = ballPos::col-1-velocity ; j < ballPos::col ; j++){
             if(level0[i][j] == 1){
                 return false;
             }
@@ -232,15 +275,37 @@ void simulateHorizontalMovement(int ellapsedTime){
     }
     
     if(ballProp::velocityX > 0){
-        if(checkRightCollisions()){        
+        if(checkRightCollisions(ballProp::velocityX)){        
             ballPos::col += ballProp::velocityX * ellapsedTime;
             signals::rolling_right1 = true;
         }
+        else{  
+            int reboundVelocity = 0;
+            while(!checkRightCollisions(ballProp::velocityX)){
+                ballProp::velocityX -= 1;
+                reboundVelocity += 1;
+            }
+            ballPos::col += ballProp::velocityX *ellapsedTime;
+            signals::rolling_right1 = true;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityX = -reboundVelocity/2;
+        }
     }   
     else if(ballProp::velocityX < 0){
-        if(checkLeftCollisions()){        
+        if(checkLeftCollisions(-ballProp::velocityX)){        
             ballPos::col += ballProp::velocityX * ellapsedTime;
             signals::rolling_left1 = true;
+        }
+        else{  
+            int reboundVelocity = 0;
+            while(!checkLeftCollisions(-ballProp::velocityX)){
+                ballProp::velocityX += 1;
+                reboundVelocity += 1;
+            }
+            ballPos::col += ballProp::velocityX * ellapsedTime;
+            signals::rolling_left1 = true;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityX = reboundVelocity/2;
         }
     }
 };
@@ -254,7 +319,13 @@ int arctan(int y, int x){
     if(x < 0){
         theta += 180;
     }
-    if(y < 0){
+    if(y < 0 && x == 0){
+        theta = 270;
+    }
+    else if(y > 0 && x == 0){
+        theta = 90;
+    }
+    else if(y < 0){
         theta += 360;
     }
     return theta;
@@ -263,11 +334,18 @@ int arctan(int y, int x){
 
 void simulateMovement(int ellapsedTime){
     //using unit circle, find the direction in rad or degree of force to then map it on a compass
-    int theta = arctan(ballProp::accelerationY, ballProp::accelerationX);
+    //since downwards is positive, y acceleration must be given a -sign.
+    int theta = arctan(-ballProp::accelerationY, ballProp::accelerationX);
+    std::cout << "ForceX: " << forceBar::xForce << "    \n" << "ForceY: " << forceBar::yForce << "    \n";
+    std::cout << "Force: " << forceBar::force << "    \n";
 
     resetVector();
     switch (theta){
         case 0:
+            //check if net force is 0.
+            if(ballProp::accelerationX == 0 && ballProp::accelerationY == 0){
+                break;
+            }
             forceCompass::forceUnitVector[2][3] = 1;
             break;
         case 90: 

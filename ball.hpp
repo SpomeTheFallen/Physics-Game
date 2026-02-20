@@ -20,11 +20,14 @@ struct signals{
     static bool rolling_right2;
     static bool rolling_left1;
     static bool rolling_left2;
+    static bool springed1;
+    static bool springed2;
 };
 
 enum class direction{
     left,
-    right
+    right,
+    compress
 };
 
 namespace forceBar{
@@ -63,3 +66,6 @@ void simulateMovement(int ellapsedTime = 1);
 extern int ball[ballProp::rows][ballProp::cols];
 extern int ballR1[ballProp::rows][ballProp::cols];
 extern int ballR2[ballProp::rows][ballProp::cols];
+
+extern int ballSpringed1[ballProp::rows][ballProp::cols];
+extern int ballSpringed2[ballProp::rows][ballProp::cols];
