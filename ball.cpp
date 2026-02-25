@@ -1,7 +1,31 @@
 #include "ball.hpp"
 #include "level_grids.hpp"
-#include <math.h>
+#include <cmath>
 #include <iostream>
+
+using std::sqrt; using std::round; using std::atan; using std::cos; using std::sin;
+
+int arctan(int y, int x){
+    int theta = 0;
+    if(x != 0){
+        theta = round(atan(y/x) * (180/(2*M_PI)));
+    }
+    
+    if(x < 0){
+        theta += 180;
+    }
+    if(y < 0 && x == 0){
+        theta = 270;
+    }
+    else if(y > 0 && x == 0){
+        theta = 90;
+    }
+    else if(y < 0){
+        theta += 360;
+    }
+
+    return theta;
+}
 
 // 0 = air, 1 = ball, 2 = ball (texture)
 
@@ -59,7 +83,7 @@ void transferEnergy(int velocityChange){
     }
 
 }
-//force 
+//---force---
 
 //2 = compass border, 1 = vector, 0 = space
 int forceCompass::forceUnitVector[5][5] = {
@@ -91,6 +115,7 @@ int forceBar::bar[10] = {0,0,0,0,0,0,0,0,0,0};
 void chargeForce(direction dir){
     int temp_xForce = forceBar::xForce;
     int temp_yForce = forceBar::yForce;
+  
     switch (dir){
         case direction::left: 
             temp_xForce --;
@@ -103,7 +128,7 @@ void chargeForce(direction dir){
             temp_yForce ++;
             break;
     }
-    
+
     int temp_force = round(sqrt(temp_xForce*temp_xForce + temp_yForce*temp_yForce));
     if(temp_force <= 10 && temp_force <= energyBar::internal){
         forceBar::force = temp_force;
@@ -150,8 +175,6 @@ void executeForce(){
 }
 
 
-
-
 //move signals
 bool signals::rolling_right1 = false;
 bool signals::rolling_right2 = false;
@@ -159,19 +182,23 @@ bool signals::rolling_left1 = false;
 bool signals::rolling_left2 = false;
 bool signals::springed1 = false;
 bool signals::springed2 = false;
+bool signals::grappled = false;
 int signals::rolling_counter = 0;
+
 //velocities
 int ballProp::velocityX = 0;
 int ballProp::velocityY = 0;
 int ballProp::accelerationX = 0;
 int ballProp::accelerationY = 0;
 
-/*movement
+/*---movement---
 For collision checks, ballPos = pos relative to terminal
 Level array is shifted to the left and up compared to terminal
 1 unit = 1 meter
 Acceleration is in unit/millisecond^2;
 Velocity is in unit/millisecond; 
+ballPos::row or ::col is shifted by -1 to account for level array shift
+ballProp::rows or ::cols is shifted by -1 to find proper end posistion
 */
 
 //pass the absolute value of velocity for each collision check
@@ -190,7 +217,7 @@ bool checkRightCollisions(int velocity){
 }
 
 bool checkLeftCollisions(int velocity){
-    if(!(ballPos::col > velocity)){
+    if(!(ballPos::col - velocity > 0)){
         return false;
     }
     for(int i = ballPos::row; i < (ballPos::row + ballProp::rows-1) ; i++){
@@ -216,6 +243,37 @@ bool checkDownCollisions(int velocity){
     return true;
 }
 
+bool checkUpCollisions(int velocity){
+    if(!((ballPos::row - velocity ) > 0)){
+        return false;
+    }
+    for(int i = ballPos::row-1 - velocity; i < ballPos::row; i++){
+        for(int j = ballPos::col - 1 ; j < ballPos::col + ballProp::cols - 1 ; j++){
+            if(level0[i][j] == 1){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+//---grapple---
+
+void launch_grapple(){
+    grapple::theta_i = 15;
+
+    signals::grappled = true;
+
+    int yRadius = 1;
+    while (checkUpCollisions(yRadius+1)){
+        yRadius ++;
+    }
+    std::cout << "\n YRadius: " << yRadius << "   \n";
+    
+    grapple::radius = yRadius/cos(grapple::theta_i*M_PI/180); 
+
+    std::cout << "Radius: " << grapple::radius << "   \n";
+}
 
 void move_up(){
     if(ballPos::row > 1){
@@ -252,8 +310,19 @@ void simulateVerticalMovement(int ellapsedTime){
         }
     }
     else if(ballProp::velocityY < 0){
-        ballPos::row += -1 * ellapsedTime;
-        return;
+        if(checkUpCollisions(-ballProp::velocityY)){       
+            ballPos::row += ballProp::velocityY * ellapsedTime;
+        }
+        else{
+            int reboundVelocity = 0;
+            while(!checkUpCollisions(-ballProp::velocityY)){
+                ballProp::velocityY += 1;
+                reboundVelocity += 1;
+            }
+            ballPos::row += ballProp::velocityY *ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityY = reboundVelocity/2;
+        }
     }
       
 }
@@ -308,42 +377,123 @@ void simulateHorizontalMovement(int ellapsedTime){
             ballProp::velocityX = reboundVelocity/2;
         }
     }
-};
+}
 
-int arctan(int y, int x){
-    int theta = 0;
-    if(x != 0){
-        int theta = std::atan(y/x) * (180/(2*M_PI));
+int thetaIncrement;
+int velocity = 0;
+
+void simulatePendulumMotion(int ellapsedTime){
+    
+    if((grapple::theta_i > 0 && thetaIncrement < 0) || (grapple::theta_i < 0 && thetaIncrement > 0))
+        velocity += ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(grapple::theta_i*M_PI/180))));
+    else
+        velocity -= ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(grapple::theta_i*M_PI/180))));
+    std::cout << "Velocity: " << velocity << "    \n";
+    //X movement
+    if((velocity*sin(grapple::theta_i*M_PI/180)) > 0)
+        ballProp::velocityX = ceil(velocity*sin(grapple::theta_i*M_PI/180));
+    else
+        ballProp::velocityX = floor(velocity*sin(grapple::theta_i*M_PI/180));
+
+    if(ballProp::velocityX > 0){
+        if(checkRightCollisions(ballProp::velocityX)){        
+            ballPos::col += ballProp::velocityX * ellapsedTime;
+        }
+        else{  
+            int reboundVelocity = 0;
+            while(!checkRightCollisions(ballProp::velocityX)){
+                ballProp::velocityX -= 1;
+                reboundVelocity += 1;
+            }
+            ballPos::col += ballProp::velocityX *ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityX = -reboundVelocity/2;
+        }
+    }   
+    else if(ballProp::velocityX < 0){
+        if(checkLeftCollisions(-ballProp::velocityX)){        
+            ballPos::col += ballProp::velocityX * ellapsedTime;
+        }
+        else{  
+            int reboundVelocity = 0;
+            while(!checkLeftCollisions(-ballProp::velocityX)){
+                ballProp::velocityX += 1;
+                reboundVelocity += 1;
+            }
+            ballPos::col += ballProp::velocityX * ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityX = reboundVelocity/2;
+        }
     }
-   
-    if(x < 0){
-        theta += 180;
+
+    //Y movement
+    //negative cos since down is positive
+    if((velocity*-cos(grapple::theta_i*M_PI/180)) > 0)
+        ballProp::velocityY = ceil(velocity*-cos(grapple::theta_i*M_PI/180));
+    else
+        ballProp::velocityY = floor(velocity*-cos(grapple::theta_i*M_PI/180));
+
+    if(ballProp::velocityY > 0){
+        if(checkDownCollisions(ballProp::velocityY)){       
+            ballPos::row += ballProp::velocityY * ellapsedTime;
+        }
+        else{
+            int reboundVelocity = 0;
+            while(!checkDownCollisions(ballProp::velocityY)){
+                ballProp::velocityY -= 1;
+                reboundVelocity += 1;
+            }
+            ballPos::row += ballProp::velocityY *ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityY = -reboundVelocity/2;
+        }
     }
-    if(y < 0 && x == 0){
-        theta = 270;
+    else if(ballProp::velocityY < 0){
+        if(checkUpCollisions(-ballProp::velocityY)){       
+            ballPos::row += ballProp::velocityY * ellapsedTime;
+        }
+        else{
+            int reboundVelocity = 0;
+            while(!checkUpCollisions(-ballProp::velocityY)){
+                ballProp::velocityY += 1;
+                reboundVelocity += 1;
+            }
+            ballPos::row += ballProp::velocityY *ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityY = reboundVelocity/2;
+        }
     }
-    else if(y > 0 && x == 0){
-        theta = 90;
-    }
-    else if(y < 0){
-        theta += 360;
-    }
-    return theta;
+
+    
+    /*
+    simplified theta to be a set function of time  
+    theta(t) = theta_i + thetaIncrement; 
+    */ 
+    if(grapple::theta_i == 15)
+        thetaIncrement = -1;
+    else if(grapple::theta_i == -15)
+        thetaIncrement = 1;
+    
+    grapple::theta_i += thetaIncrement;
+    
 }
 
 
 void simulateMovement(int ellapsedTime){
     //using unit circle, find the direction in rad or degree of force to then map it on a compass
-    //since downwards is positive, y acceleration must be given a -sign.
-    int theta = arctan(-ballProp::accelerationY, ballProp::accelerationX);
-    std::cout << "ForceX: " << forceBar::xForce << "    \n" << "ForceY: " << forceBar::yForce << "    \n";
-    std::cout << "Force: " << forceBar::force << "    \n";
+    
+    int theta = arctan(forceBar::yForce, forceBar::xForce);
+    
+    std::cout << "VelocityX: " << ballProp::velocityX << "    \n" << "VelocityY: " << ballProp::velocityY << "    \n";
+    std::cout << "Force: " << forceBar::force << "    \n" << "Theta: " << theta << "    \n";
+    std::cout << "Grapple Theta: " << grapple::theta_i << "    \n";
 
+    //force compass
     resetVector();
     switch (theta){
         case 0:
             //check if net force is 0.
-            if(ballProp::accelerationX == 0 && ballProp::accelerationY == 0){
+            if(forceBar::xForce == 0 && forceBar::yForce == 0){
                 break;
             }
             forceCompass::forceUnitVector[2][3] = 1;
@@ -367,6 +517,13 @@ void simulateMovement(int ellapsedTime){
             else if(theta > 270)
                 forceCompass::forceUnitVector[3][3] = 1;
     }
-    simulateVerticalMovement(ellapsedTime);
-    simulateHorizontalMovement(ellapsedTime);
+
+    //movement functions
+    if(signals::grappled){
+        simulatePendulumMotion(ellapsedTime);
+    }
+    else{
+        simulateVerticalMovement(ellapsedTime);
+        simulateHorizontalMovement(ellapsedTime);
+    }
 }

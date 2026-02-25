@@ -19,14 +19,22 @@ int main(){
         //game loop (synced with key presses)
         if(std::chrono::steady_clock::now() >= nextKeyTime){
             if(_kbhit()) {           // check if a key was pressed
-                char key = _getch();    
-                if(key == 'd') chargeForce(direction::right);
-                else if (key == 'a') chargeForce(direction::left);
-                else if (key == 'w') move_up();
-                else if (key == 's') chargeForce(direction::compress);
-                else if (key == 'e') executeForce();
-                else if (key == 'r') {ballPos::row = 1 ; ballPos::col = 1;}
-                else if (key == 'q') break;  
+                char key = _getch();  
+                if (key == 'q') break;  
+                else if(!signals::grappled){
+                    if(key == 'd') chargeForce(direction::right);
+                    else if (key == 'a') chargeForce(direction::left);
+                    else if (key == 'w') move_up();
+                    else if (key == 's') chargeForce(direction::compress);
+                    else if (key == 'e') executeForce();
+                    else if (key == 'f') launch_grapple(); 
+                    else if (key == 'r') {ballPos::row = 1 ; ballPos::col = 1;}
+                }
+                else if(signals::grappled){
+                    if(key == 'f') signals::grappled = false; 
+                    else if (key == 'r') {ballPos::row = 1 ; ballPos::col = 1;}
+                }
+                
                 nextKeyTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(200);
             }
         }

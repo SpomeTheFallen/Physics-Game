@@ -11,7 +11,14 @@ namespace ballProp{
 namespace ballPos{
     inline int col = 1;
     inline int row = 1;
+  
 }
+
+namespace grapple{
+    inline int theta_i = 15;  
+    inline int radius = 2;
+} 
+
 
 struct signals{
     static int rolling_counter;
@@ -22,6 +29,7 @@ struct signals{
     static bool rolling_left2;
     static bool springed1;
     static bool springed2;
+    static bool grappled;
 };
 
 enum class direction{
@@ -58,6 +66,8 @@ void transferEnergy(int velocityChange);
 void chargeForce(direction dir);
 
 void executeForce();
+
+void launch_grapple();
 
 void move_up();
 
