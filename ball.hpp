@@ -15,8 +15,9 @@ namespace ballPos{
 }
 
 namespace grapple{
-    inline int theta_i = 15;  
+    inline int theta_i = 5;  
     inline int radius = 2;
+    inline int velocity = 0;
 } 
 
 

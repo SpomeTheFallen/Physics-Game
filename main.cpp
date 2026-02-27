@@ -16,6 +16,8 @@ int main(){
     while(true){
         draw();     
         simulateMovement();
+        //if(grapple::theta_i == 0)
+          //  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         //game loop (synced with key presses)
         if(std::chrono::steady_clock::now() >= nextKeyTime){
             if(_kbhit()) {           // check if a key was pressed

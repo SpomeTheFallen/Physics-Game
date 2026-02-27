@@ -260,7 +260,8 @@ bool checkUpCollisions(int velocity){
 //---grapple---
 
 void launch_grapple(){
-    grapple::theta_i = 15;
+    grapple::theta_i = 5;
+    grapple::velocity = 0;
 
     signals::grappled = true;
 
@@ -268,12 +269,10 @@ void launch_grapple(){
     while (checkUpCollisions(yRadius+1)){
         yRadius ++;
     }
-    std::cout << "\n YRadius: " << yRadius << "   \n";
     
     grapple::radius = yRadius/cos(grapple::theta_i*M_PI/180); 
-
-    std::cout << "Radius: " << grapple::radius << "   \n";
 }
+
 
 void move_up(){
     if(ballPos::row > 1){
@@ -380,20 +379,35 @@ void simulateHorizontalMovement(int ellapsedTime){
 }
 
 int thetaIncrement;
-int velocity = 0;
-
+//All energy conserved in swing
 void simulatePendulumMotion(int ellapsedTime){
+    /*
+    simplified theta to be a set function of time  
+    theta(t) = theta_i + thetaIncrement; 
+    */ 
+    if(grapple::theta_i == 5)
+        thetaIncrement = -1;
+    else if(grapple::theta_i == -5)
+        thetaIncrement = 1;
     
-    if((grapple::theta_i > 0 && thetaIncrement < 0) || (grapple::theta_i < 0 && thetaIncrement > 0))
-        velocity += ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(grapple::theta_i*M_PI/180))));
-    else
-        velocity -= ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(grapple::theta_i*M_PI/180))));
-    std::cout << "Velocity: " << velocity << "    \n";
+    grapple::theta_i += thetaIncrement;
+
+    if(grapple::theta_i > 0)
+        grapple::velocity += ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(thetaIncrement*M_PI/180))));
+    else if (grapple::theta_i < 0)
+        grapple::velocity -= ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(thetaIncrement*M_PI/180))));
+    else if(thetaIncrement < 0)
+        grapple::velocity += ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(thetaIncrement*M_PI/180))));
+    else if(thetaIncrement > 0)
+        grapple::velocity -= ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(thetaIncrement*M_PI/180))));
+    
+
+
     //X movement
-    if((velocity*sin(grapple::theta_i*M_PI/180)) > 0)
-        ballProp::velocityX = ceil(velocity*sin(grapple::theta_i*M_PI/180));
+    if(( (float)grapple::velocity*cos(grapple::theta_i*M_PI/180)) > 0)
+        ballProp::velocityX = ceil( grapple::velocity*cos(grapple::theta_i*M_PI/180));
     else
-        ballProp::velocityX = floor(velocity*sin(grapple::theta_i*M_PI/180));
+        ballProp::velocityX = floor( grapple::velocity*cos(grapple::theta_i*M_PI/180));
 
     if(ballProp::velocityX > 0){
         if(checkRightCollisions(ballProp::velocityX)){        
@@ -427,11 +441,10 @@ void simulatePendulumMotion(int ellapsedTime){
     }
 
     //Y movement
-    //negative cos since down is positive
-    if((velocity*-cos(grapple::theta_i*M_PI/180)) > 0)
-        ballProp::velocityY = ceil(velocity*-cos(grapple::theta_i*M_PI/180));
+    if(( (float)grapple::velocity*sin(grapple::theta_i*M_PI/180)) > 0)
+        ballProp::velocityY = ceil( grapple::velocity*sin(grapple::theta_i*M_PI/180));
     else
-        ballProp::velocityY = floor(velocity*-cos(grapple::theta_i*M_PI/180));
+        ballProp::velocityY = floor( grapple::velocity*sin(grapple::theta_i*M_PI/180));
 
     if(ballProp::velocityY > 0){
         if(checkDownCollisions(ballProp::velocityY)){       
@@ -465,20 +478,12 @@ void simulatePendulumMotion(int ellapsedTime){
     }
 
     
-    /*
-    simplified theta to be a set function of time  
-    theta(t) = theta_i + thetaIncrement; 
-    */ 
-    if(grapple::theta_i == 15)
-        thetaIncrement = -1;
-    else if(grapple::theta_i == -15)
-        thetaIncrement = 1;
-    
-    grapple::theta_i += thetaIncrement;
+
     
 }
 
-
+int velocityMax = 0;
+int velocityMin = 0;
 void simulateMovement(int ellapsedTime){
     //using unit circle, find the direction in rad or degree of force to then map it on a compass
     
@@ -487,6 +492,11 @@ void simulateMovement(int ellapsedTime){
     std::cout << "VelocityX: " << ballProp::velocityX << "    \n" << "VelocityY: " << ballProp::velocityY << "    \n";
     std::cout << "Force: " << forceBar::force << "    \n" << "Theta: " << theta << "    \n";
     std::cout << "Grapple Theta: " << grapple::theta_i << "    \n";
+    std::cout << "Velocity: " <<  grapple::velocity << "    \n";
+    std::cout << "Max: " << velocityMax << "      \n" << "Min: " << velocityMin << "      \n"; 
+
+    if(grapple::velocity > velocityMax) velocityMax = grapple::velocity;
+    if(grapple::velocity < velocityMin) velocityMin = grapple::velocity;
 
     //force compass
     resetVector();
