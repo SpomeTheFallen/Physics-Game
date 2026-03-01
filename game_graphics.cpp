@@ -166,6 +166,9 @@ void draw(){
                 }
                 
             }
+            else if(j == grapple::col && i == grapple::row && signals::grappled){
+                std::cout << '*';
+            }
             else{
                 std::cout << ' ';
             }

@@ -29,8 +29,8 @@ int main(){
                     else if (key == 'w') move_up();
                     else if (key == 's') chargeForce(direction::compress);
                     else if (key == 'e') executeForce();
-                    else if (key == 'f') launch_grapple(); 
-                    else if (key == 'r') {ballPos::row = 1 ; ballPos::col = 1;}
+                    else if (key == 'f') launch_grapple(direction::right); 
+                    else if (key == 'r') {ballPos::row = 1 ; ballPos::col = 1; energyBar::internal = 100;}
                 }
                 else if(signals::grappled){
                     if(key == 'f') signals::grappled = false; 

@@ -15,9 +15,14 @@ namespace ballPos{
 }
 
 namespace grapple{
-    inline int theta_i = 5;  
-    inline int radius = 2;
-    inline int velocity = 0;
+    inline float theta = 0;  
+    inline float thetaChange = 0;
+    inline float thetaMax = 0;
+    inline int radius = 0;
+    inline float velocity = 0;
+    inline float iVelocity = 0;
+    inline int row = 0;
+    inline int col = 0;
 } 
 
 
@@ -68,7 +73,7 @@ void chargeForce(direction dir);
 
 void executeForce();
 
-void launch_grapple();
+void launch_grapple(direction dir);
 
 void move_up();
 

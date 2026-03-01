@@ -5,14 +5,16 @@
 
 using std::sqrt; using std::round; using std::atan; using std::cos; using std::sin;
 
+int g = 2;
+
 int arctan(int y, int x){
     int theta = 0;
     if(x != 0){
-        theta = round(atan(y/x) * (180/(2*M_PI)));
+        theta = round(atan(y/x) * (180.0/(M_PI)));
     }
     
     if(x < 0){
-        theta += 180;
+        theta += 180.0;
     }
     if(y < 0 && x == 0){
         theta = 270;
@@ -26,6 +28,7 @@ int arctan(int y, int x){
 
     return theta;
 }
+
 
 // 0 = air, 1 = ball, 2 = ball (texture)
 
@@ -259,9 +262,10 @@ bool checkUpCollisions(int velocity){
 
 //---grapple---
 
-void launch_grapple(){
-    grapple::theta_i = 5;
+void launch_grapple(direction dir){
+    grapple::theta = 0;
     grapple::velocity = 0;
+    grapple::iVelocity = ballProp::velocityX;
 
     signals::grappled = true;
 
@@ -269,8 +273,30 @@ void launch_grapple(){
     while (checkUpCollisions(yRadius+1)){
         yRadius ++;
     }
+
+    grapple::radius = (yRadius/cos(grapple::theta*M_PI/180.0)); 
+
+    float ratio = ((grapple::iVelocity*grapple::iVelocity)/(2*g*grapple::radius));
+    if(ratio > 2)
+        ratio = 2;
+    else if (ratio < 0)
+        ratio = 0;
     
-    grapple::radius = yRadius/cos(grapple::theta_i*M_PI/180); 
+        
+    grapple::thetaMax = acos((1-ratio))*3;
+    grapple::theta = grapple::thetaMax;
+
+    switch (dir){
+        case direction::right:
+            grapple::thetaChange = grapple::thetaMax/3;
+            break;
+    }
+
+    std::cout << "ThetaMax: " << grapple::thetaMax << "     \n";
+    std::cout << "vi: " << grapple::iVelocity << "     \n";
+
+    grapple::row = ballPos::row - yRadius;
+    grapple::col = ballPos::col + ballProp::cols + ceil(grapple::radius*sin(grapple::theta));
 }
 
 
@@ -287,7 +313,7 @@ void simulateVerticalMovement(int ellapsedTime){
     
     // gravity
     if(checkDownCollisions(1)){
-        ballProp::accelerationY = 2; 
+        ballProp::accelerationY = g; 
     }
     else{
         ballProp::velocityY > 0 ? ballProp::accelerationY -= 1 : ballProp::accelerationY = 0;
@@ -378,36 +404,35 @@ void simulateHorizontalMovement(int ellapsedTime){
     }
 }
 
-int thetaIncrement;
+
 //All energy conserved in swing
 void simulatePendulumMotion(int ellapsedTime){
     /*
     simplified theta to be a set function of time  
     theta(t) = theta_i + thetaIncrement; 
     */ 
-    if(grapple::theta_i == 5)
-        thetaIncrement = -1;
-    else if(grapple::theta_i == -5)
-        thetaIncrement = 1;
+    if(grapple::theta >= grapple::thetaMax)
+        grapple::thetaChange = -grapple::thetaMax/3;
+    else if(grapple::theta <= -grapple::thetaMax)
+        grapple::thetaChange = grapple::thetaMax/3;
     
-    grapple::theta_i += thetaIncrement;
+    grapple::theta += grapple::thetaChange;
 
-    if(grapple::theta_i > 0)
-        grapple::velocity += ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(thetaIncrement*M_PI/180))));
-    else if (grapple::theta_i < 0)
-        grapple::velocity -= ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(thetaIncrement*M_PI/180))));
-    else if(thetaIncrement < 0)
-        grapple::velocity += ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(thetaIncrement*M_PI/180))));
-    else if(thetaIncrement > 0)
-        grapple::velocity -= ceil(sqrt(2*2*(grapple::radius - grapple::radius*cos(thetaIncrement*M_PI/180))));
-    
-
+    if(grapple::theta > 0)
+        grapple::velocity += ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
+    else if (grapple::theta < 0)
+        grapple::velocity -= ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
+    else if(grapple::thetaChange < 0)
+        grapple::velocity += ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
+    else if(grapple::thetaChange > 0)
+        grapple::velocity -= ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
 
     //X movement
-    if(( (float)grapple::velocity*cos(grapple::theta_i*M_PI/180)) > 0)
-        ballProp::velocityX = ceil( grapple::velocity*cos(grapple::theta_i*M_PI/180));
+     if(( (float)grapple::velocity*cos(grapple::theta*M_PI/180)) > 0)
+        ballProp::velocityX = ceil( grapple::velocity*cos(grapple::theta*M_PI/180));
     else
-        ballProp::velocityX = floor( grapple::velocity*cos(grapple::theta_i*M_PI/180));
+        ballProp::velocityX = floor( grapple::velocity*cos(grapple::theta*M_PI/180));
+
 
     if(ballProp::velocityX > 0){
         if(checkRightCollisions(ballProp::velocityX)){        
@@ -441,11 +466,12 @@ void simulatePendulumMotion(int ellapsedTime){
     }
 
     //Y movement
-    if(( (float)grapple::velocity*sin(grapple::theta_i*M_PI/180)) > 0)
-        ballProp::velocityY = ceil( grapple::velocity*sin(grapple::theta_i*M_PI/180));
+    if(( (float)grapple::velocity*sin(grapple::theta*M_PI/180)) > 0)
+        ballProp::velocityY = ceil( grapple::velocity*sin(grapple::theta*M_PI/180));
     else
-        ballProp::velocityY = floor( grapple::velocity*sin(grapple::theta_i*M_PI/180));
+        ballProp::velocityY = floor( grapple::velocity*sin(grapple::theta*M_PI/180));
 
+    
     if(ballProp::velocityY > 0){
         if(checkDownCollisions(ballProp::velocityY)){       
             ballPos::row += ballProp::velocityY * ellapsedTime;
@@ -476,28 +502,20 @@ void simulatePendulumMotion(int ellapsedTime){
             ballProp::velocityY = reboundVelocity/2;
         }
     }
-
-    
-
-    
 }
 
-int velocityMax = 0;
-int velocityMin = 0;
+float max = 0.0;
+float min = 0.0;
+
 void simulateMovement(int ellapsedTime){
     //using unit circle, find the direction in rad or degree of force to then map it on a compass
     
     int theta = arctan(forceBar::yForce, forceBar::xForce);
     
-    std::cout << "VelocityX: " << ballProp::velocityX << "    \n" << "VelocityY: " << ballProp::velocityY << "    \n";
-    std::cout << "Force: " << forceBar::force << "    \n" << "Theta: " << theta << "    \n";
-    std::cout << "Grapple Theta: " << grapple::theta_i << "    \n";
-    std::cout << "Velocity: " <<  grapple::velocity << "    \n";
-    std::cout << "Max: " << velocityMax << "      \n" << "Min: " << velocityMin << "      \n"; 
-
-    if(grapple::velocity > velocityMax) velocityMax = grapple::velocity;
-    if(grapple::velocity < velocityMin) velocityMin = grapple::velocity;
-
+    
+    if(ballProp::velocityX > max) max = ballProp::velocityX;
+    if(ballProp::velocityX < min) min = ballProp::velocityX;
+    
     //force compass
     resetVector();
     switch (theta){
