@@ -1,9 +1,12 @@
+#pragma once
+
 #include "VertexArray.hpp"
 #include "Shader.hpp"
 #include "Quads.hpp"
 #include "Texture.hpp"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <vector>
 
 class Renderer{
     public:
@@ -19,7 +22,5 @@ class Renderer{
         GLFWwindow* _window;
         VertexArray* _VAO;
         Shader* _shader;
-        Texture* _normal;
-        
-       
+        std::vector<Texture*> _textures;
 };

@@ -24,6 +24,10 @@ void draw(){
 
             //energy bar & force bar
             if(j > l0Prop::cols){
+                if(j == l0Prop::cols+1){
+                    std::cout << 'x';
+                    continue;
+                }
                 if(energyBar::row <= i && i < energyBar::row + 10){
                     if(j == energyBar::col-1){
                         std::cout << '[';
@@ -66,7 +70,8 @@ void draw(){
                         }        
                     }
                 }
-                
+            
+
                 continue;
             }
 

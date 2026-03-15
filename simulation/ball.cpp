@@ -206,7 +206,7 @@ ballProp::rows or ::cols is shifted by -1 to find proper end posistion
 
 //pass the absolute value of velocity for each collision check
 bool checkRightCollisions(int velocity){
-    if(!((ballPos::col + ballProp::cols-1 + velocity) < (l0Prop::cols))){
+    if(!((ballPos::col + ballProp::cols-1 + velocity) < (l0Prop::cols+1))){
         return false;
     }
     for(int i = ballPos::row; i < (ballPos::row + ballProp::rows-1) ; i++){

@@ -30,36 +30,53 @@ Renderer::Renderer(){
     _VAO = new VertexArray();
     _VAO->Package(_quads->Indices().data(), _quads->Indices().size(), _quads->Vertices().data(), _quads->Vertices().size(), _quads->Types());
     
-    _normal = new Texture(0);  
+    
+    Texture* normal = new Texture(0);
+    Texture* ball = new Texture(1, "Rendering/resources/textures/ball.png");
+    _textures.push_back(normal);
+    _textures.push_back(ball);
 
     _shader = new Shader("Rendering/resources/Default.shader");
     _shader->SetUniform4f("uColor", 1.0f, 1.0f, 1.0f, 1.0f);
 
     glm::mat4 proj = glm::ortho(0.0f, 86.0f, 0.0f, 35.0f, -1.0f, 1.0f);
-    int samplers[1] = {0};
+    int samplers[2] = {0, 1};
     
     _shader->SetUniformMat4f("uProj", proj);
-    _shader->SetUniform1iv("uTexture", 1, samplers);
+    _shader->SetUniform1iv("uTexture", 2, samplers);
 }
 
 Renderer::~Renderer(){
     delete _quads;
     delete _VAO;
     delete _shader;
-    delete _normal;
+    _textures.clear();
     glfwTerminate();
 }
 
 
 void Renderer::updateQuads(){
     float ball_x = ballPos::col;
-    float ball_y = l0Prop::rows - ballPos::row;
-    
+    float ball_y = l0Prop::rows-1 - ballPos::row;
     _quads->clear();
-    _quads->makeSquare(1.0f, 0.0f, 1.0f, 1.0f, 0, glm::vec3(ball_x, ball_y, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
-    _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(l0Prop::cols, l0Prop::rows/2.0f, 0.0f), glm::vec3(1.0f, l0Prop::rows, 1.0f));
-    _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(0.0f, l0Prop::rows/2.0f, 0.0f), glm::vec3(1.0f, l0Prop::rows, 1.0f));
+    //ball
+    _quads->makeSquare(1.0f, 0.0f, 1.0f, 1.0f, 1, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+
+    //level
+    _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(l0Prop::cols+.5f, l0Prop::rows/2.0f, 0.0f), glm::vec3(2.0f, l0Prop::rows, 1.0f));
+    _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(0.5f, l0Prop::rows/2.0f, 0.0f), glm::vec3(2.0f, l0Prop::rows, 1.0f));
     _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(l0Prop::cols/2.0f, 0.0f, 0.0f), glm::vec3(l0Prop::cols, 1.0f, 1.0f));
+
+    for(int i = 0; i < l0Prop::rows ; i++){
+        for(int j = 0; j < l0Prop::cols ; j++){
+            if(level0[i][j] == 1){
+                _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, l0Prop::rows-i, 0.0f), glm::vec3(2.0f, 1.0f, 1.0f));
+            }
+        }
+    }
+
+    //force compass
+    //_quads->makeSquare();
 
     _VAO->Repackage(_quads->Indices().data(), _quads->Indices().size(), _quads->Vertices().data(), _quads->Vertices().size());
 }
