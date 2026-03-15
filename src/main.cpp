@@ -4,6 +4,7 @@
 #include <conio.h>
 #include "ball.hpp"
 #include "game_graphics.hpp"
+#include "../Rendering/Renderer.hpp"
 
 auto nextKeyTime = std::chrono::steady_clock::now();
 
@@ -11,13 +12,14 @@ auto nextKeyTime = std::chrono::steady_clock::now();
 int main(){
     readyTerminal();
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    Renderer renderer;
     
     //Graphics run
-    while(true){
+    while(renderer.windowOpen()){
+        renderer.render();
         draw();     
         simulateMovement();
-        //if(grapple::theta_i == 0)
-          //  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+        
         //game loop (synced with key presses)
         if(std::chrono::steady_clock::now() >= nextKeyTime){
             if(_kbhit()) {           // check if a key was pressed
@@ -39,8 +41,24 @@ int main(){
                 
                 nextKeyTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(200);
             }
+            else {           
+                if (renderer.readKey(GLFW_KEY_Q)) break;  
+                else if(!signals::grappled){
+                    if(renderer.readKey(GLFW_KEY_D)) chargeForce(direction::right);
+                    else if (renderer.readKey(GLFW_KEY_A)) chargeForce(direction::left);
+                    else if (renderer.readKey(GLFW_KEY_W)) move_up();
+                    else if (renderer.readKey(GLFW_KEY_S)) chargeForce(direction::compress);
+                    else if (renderer.readKey(GLFW_KEY_E)) executeForce();
+                    else if (renderer.readKey(GLFW_KEY_F)) launch_grapple(direction::right); 
+                    else if (renderer.readKey(GLFW_KEY_R)) {ballPos::row = 1 ; ballPos::col = 1; energyBar::internal = 100;}
+                }
+                else if(signals::grappled){
+                    if(renderer.readKey(GLFW_KEY_F)) signals::grappled = false; 
+                    else if (renderer.readKey(GLFW_KEY_R)) {ballPos::row = 1 ; ballPos::col = 1;}
+                }
+                
+            }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 
