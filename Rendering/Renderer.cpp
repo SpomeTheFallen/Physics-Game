@@ -1,7 +1,7 @@
 #include "Renderer.hpp"
 #include <iostream>
-#include "../src/ball.hpp"
-#include "../src/level_grids.hpp"
+#include "../simulation/ball.hpp"
+#include "../simulation/level_grids.hpp"
 
 Renderer::Renderer(){
     if (!glfwInit())

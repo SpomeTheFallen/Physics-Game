@@ -1,5 +1,5 @@
 #include "Renderer.hpp"
-#include "../src/ball.hpp"
+#include "../simulation/ball.hpp"
 #include <iostream>
 
 int main(){
