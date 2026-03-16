@@ -11,7 +11,6 @@ class Quads{
         std::vector<unsigned int> Indices() const {return _indices;}
         std::vector<VertexType> Types() const {return _types;}
 
-        void makeTri(float r, float g, float b, float a);
         void makeSquare(
             float r, float g, float b, float a,
             float textureIndex,
