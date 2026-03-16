@@ -1,3 +1,0 @@
-void draw();
-
-void readyTerminal();

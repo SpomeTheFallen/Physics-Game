@@ -89,23 +89,8 @@ void transferEnergy(int velocityChange){
 //---force---
 
 //2 = compass border, 1 = vector, 0 = space
-int forceCompass::forceUnitVector[5][5] = {
-    0, 2, 2, 2, 0,
-    2, 0, 0, 0, 2,
-    2, 0, 1, 0, 2,
-    2, 0, 0, 0, 2,
-    0, 2, 2, 2, 0,
-};
 
 void resetVector(){
-    forceCompass::forceUnitVector[1][1] = 0;
-    forceCompass::forceUnitVector[1][2] = 0;
-    forceCompass::forceUnitVector[1][3] = 0;
-    forceCompass::forceUnitVector[2][1] = 0;
-    forceCompass::forceUnitVector[2][3] = 0;
-    forceCompass::forceUnitVector[3][1] = 0;
-    forceCompass::forceUnitVector[3][2] = 0;
-    forceCompass::forceUnitVector[3][3] = 0;
     forceCompass::north = false;
     forceCompass::northe = false;
     forceCompass::east = false;
@@ -138,6 +123,10 @@ void chargeForce(direction dir){
             //Simplified hookes law, by compressing the ball/spring, restoring force is +=1 per compression.
             temp_yForce ++;
             break;
+        case direction::uncompress:
+            if(forceBar::yForce > 0)
+                temp_yForce --;
+            break;
     }
 
     int temp_force = round(sqrt(temp_xForce*temp_xForce + temp_yForce*temp_yForce));
@@ -154,7 +143,9 @@ void chargeForce(direction dir){
             signals::springed1 = true;
             signals::springed2 = false;
         }
-
+        else
+            signals::springed1 = false;
+        
     }
 
     for(int i = 0 ; i < 10 ; i++){
@@ -272,8 +263,7 @@ bool checkUpCollisions(int velocity){
 
 void launch_grapple(direction dir){
     grapple::theta = 0;
-    grapple::velocity = 0;
-    grapple::iVelocity = ballProp::velocityX;
+    grapple::velocity = ballProp::velocityX;
 
     signals::grappled = true;
 
@@ -284,15 +274,10 @@ void launch_grapple(direction dir){
 
     grapple::radius = (yRadius/cos(grapple::theta*M_PI/180.0)); 
 
-    float ratio = ((grapple::iVelocity*grapple::iVelocity)/(2*g*grapple::radius));
-    if(ratio > 2)
-        ratio = 2;
-    else if (ratio < 0)
-        ratio = 0;
-    
+    float ratio = ((grapple::velocity*grapple::velocity)/(2*g*grapple::radius));
+
         
-    grapple::thetaMax = acos((1-ratio))*3;
-    grapple::theta = grapple::thetaMax;
+    grapple::thetaMax = acos((1-ratio)) * 180.0/M_PI;
 
     switch (dir){
         case direction::right:
@@ -300,8 +285,6 @@ void launch_grapple(direction dir){
             break;
     }
 
-    std::cout << "ThetaMax: " << grapple::thetaMax << "     \n";
-    std::cout << "vi: " << grapple::iVelocity << "     \n";
 
     grapple::row = ballPos::row - yRadius;
     grapple::col = ballPos::col + ballProp::cols + ceil(grapple::radius*sin(grapple::theta));
@@ -311,6 +294,124 @@ void launch_grapple(direction dir){
 void move_up(){
     if(ballPos::row > 1){
         ballPos::row -= 1;
+    }
+}
+
+//All energy conserved in swing
+void simulatePendulumMotion(int ellapsedTime){
+    /*
+    simplified theta to be a set function of time  
+    theta(t) = theta_i + thetaIncrement; 
+    */ 
+    if(grapple::theta >= grapple::thetaMax)
+        grapple::thetaChange = -grapple::thetaMax/3;
+    else if(grapple::theta <= -grapple::thetaMax)
+        grapple::thetaChange = grapple::thetaMax/3;
+    
+    
+    /*
+    if(grapple::theta > 0)
+        grapple::velocity += ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
+    else if (grapple::theta < 0)
+        grapple::velocity -= ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
+    else if(grapple::thetaChange < 0)
+        grapple::velocity += ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
+    else if(grapple::thetaChange > 0)
+        grapple::velocity -= ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
+    */
+    float theta_i = grapple::theta;
+    float theta_f = theta_i + grapple::thetaChange;
+    grapple::theta += grapple::thetaChange;
+
+    if(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f*M_PI/180.0f)-cos(theta_i*M_PI/180.0f)) < 0){
+        std::cout << "ERROR! sqrt negative ";
+        std::cout << "\nV: " << grapple::velocity;
+        std::cout << "\nTheta_f: " << theta_f;
+        std::cout << "\nTheta_i: " << theta_i;
+        return;
+    }
+        
+
+
+    if(grapple::thetaChange > 0)
+        grapple::velocity = sqrt(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f)-cos(theta_i)));
+    else if (grapple::thetaChange < 0)
+        grapple::velocity = -sqrt(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f)-cos(theta_i)));
+
+    //X movement
+    if(( (float)grapple::velocity*cos(grapple::theta*M_PI/180)) > 0)
+        ballProp::velocityX = ceil( grapple::velocity*cos(grapple::theta*M_PI/180));
+    else
+        ballProp::velocityX = floor( grapple::velocity*cos(grapple::theta*M_PI/180));
+
+
+    if(ballProp::velocityX > 0){
+        if(checkRightCollisions(ballProp::velocityX)){        
+            ballPos::col += ballProp::velocityX * ellapsedTime;
+        }
+        else{  
+            int reboundVelocity = 0;
+            while(!checkRightCollisions(ballProp::velocityX)){
+                ballProp::velocityX -= 1;
+                reboundVelocity += 1;
+            }
+            ballPos::col += ballProp::velocityX *ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityX = -reboundVelocity/2;
+        }
+    }   
+    else if(ballProp::velocityX < 0){
+        if(checkLeftCollisions(-ballProp::velocityX)){        
+            ballPos::col += ballProp::velocityX * ellapsedTime;
+        }
+        else{  
+            int reboundVelocity = 0;
+            while(!checkLeftCollisions(-ballProp::velocityX)){
+                ballProp::velocityX += 1;
+                reboundVelocity += 1;
+            }
+            ballPos::col += ballProp::velocityX * ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityX = reboundVelocity/2;
+        }
+    }
+
+    //Y movement
+    if(( (float)grapple::velocity*sin(grapple::theta*M_PI/180)) > 0)
+        ballProp::velocityY = -ceil( grapple::velocity*sin(grapple::theta*M_PI/180));
+    else
+        ballProp::velocityY = -floor( grapple::velocity*sin(grapple::theta*M_PI/180));
+
+    
+    if(ballProp::velocityY > 0){
+        if(checkDownCollisions(ballProp::velocityY)){       
+            ballPos::row += ballProp::velocityY * ellapsedTime;
+        }
+        else{
+            int reboundVelocity = 0;
+            while(!checkDownCollisions(ballProp::velocityY)){
+                ballProp::velocityY -= 1;
+                reboundVelocity += 1;
+            }
+            ballPos::row += ballProp::velocityY *ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityY = -reboundVelocity/2;
+        }
+    }
+    else if(ballProp::velocityY < 0){
+        if(checkUpCollisions(-ballProp::velocityY)){       
+            ballPos::row += ballProp::velocityY * ellapsedTime;
+        }
+        else{
+            int reboundVelocity = 0;
+            while(!checkUpCollisions(-ballProp::velocityY)){
+                ballProp::velocityY += 1;
+                reboundVelocity += 1;
+            }
+            ballPos::row += ballProp::velocityY *ellapsedTime;
+            //Assume that energy disappation leaves only half velocity remaining
+            ballProp::velocityY = reboundVelocity/2;
+        }
     }
 }
 
@@ -379,7 +480,16 @@ void simulateHorizontalMovement(int ellapsedTime){
     if(ballProp::velocityX > 0){
         if(checkRightCollisions(ballProp::velocityX)){        
             ballPos::col += ballProp::velocityX * ellapsedTime;
-            signals::rolling_right1 = true;
+            if(signals::rolling_counter == 0){
+                signals::rolling_right1 = true;
+                signals::rolling_right2 = false;
+            }
+            else if(signals::rolling_counter == 3){
+                signals::rolling_right1 = false;
+                signals::rolling_right2 = true;
+                signals::rolling_counter = -3;
+            }
+            signals::rolling_counter++;
         }
         else{  
             int reboundVelocity = 0;
@@ -388,7 +498,17 @@ void simulateHorizontalMovement(int ellapsedTime){
                 reboundVelocity += 1;
             }
             ballPos::col += ballProp::velocityX *ellapsedTime;
-            signals::rolling_right1 = true;
+            if(signals::rolling_counter == 0){
+                signals::rolling_right1 = true;
+                signals::rolling_right2 = false;
+            }
+            else if(signals::rolling_counter == 3){
+                signals::rolling_right1 = false;
+                signals::rolling_right2 = true;
+                signals::rolling_counter = -3;
+            }
+            signals::rolling_counter++;
+
             //Assume that energy disappation leaves only half velocity remaining
             ballProp::velocityX = -reboundVelocity/2;
         }
@@ -396,7 +516,16 @@ void simulateHorizontalMovement(int ellapsedTime){
     else if(ballProp::velocityX < 0){
         if(checkLeftCollisions(-ballProp::velocityX)){        
             ballPos::col += ballProp::velocityX * ellapsedTime;
-            signals::rolling_left1 = true;
+            if(signals::rolling_counter == 0){
+                signals::rolling_left1 = true;
+                signals::rolling_left2 = false;
+            }
+            else if(signals::rolling_counter == 3){
+                signals::rolling_left1 = false;
+                signals::rolling_left2 = true;
+                signals::rolling_counter = -3;
+            }
+            signals::rolling_counter++;
         }
         else{  
             int reboundVelocity = 0;
@@ -405,112 +534,30 @@ void simulateHorizontalMovement(int ellapsedTime){
                 reboundVelocity += 1;
             }
             ballPos::col += ballProp::velocityX * ellapsedTime;
-            signals::rolling_left1 = true;
+            if(signals::rolling_counter == 0){
+                signals::rolling_left1 = true;
+                signals::rolling_left2 = false;
+            }
+            else if(signals::rolling_counter == 3){
+                signals::rolling_left1 = false;
+                signals::rolling_left2 = true;
+                signals::rolling_counter = -3;
+            }
+            signals::rolling_counter++;
             //Assume that energy disappation leaves only half velocity remaining
             ballProp::velocityX = reboundVelocity/2;
         }
     }
-}
-
-
-//All energy conserved in swing
-void simulatePendulumMotion(int ellapsedTime){
-    /*
-    simplified theta to be a set function of time  
-    theta(t) = theta_i + thetaIncrement; 
-    */ 
-    if(grapple::theta >= grapple::thetaMax)
-        grapple::thetaChange = -grapple::thetaMax/3;
-    else if(grapple::theta <= -grapple::thetaMax)
-        grapple::thetaChange = grapple::thetaMax/3;
-    
-    grapple::theta += grapple::thetaChange;
-
-    if(grapple::theta > 0)
-        grapple::velocity += ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
-    else if (grapple::theta < 0)
-        grapple::velocity -= ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
-    else if(grapple::thetaChange < 0)
-        grapple::velocity += ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
-    else if(grapple::thetaChange > 0)
-        grapple::velocity -= ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
-
-    //X movement
-     if(( (float)grapple::velocity*cos(grapple::theta*M_PI/180)) > 0)
-        ballProp::velocityX = ceil( grapple::velocity*cos(grapple::theta*M_PI/180));
-    else
-        ballProp::velocityX = floor( grapple::velocity*cos(grapple::theta*M_PI/180));
-
-
-    if(ballProp::velocityX > 0){
-        if(checkRightCollisions(ballProp::velocityX)){        
-            ballPos::col += ballProp::velocityX * ellapsedTime;
-        }
-        else{  
-            int reboundVelocity = 0;
-            while(!checkRightCollisions(ballProp::velocityX)){
-                ballProp::velocityX -= 1;
-                reboundVelocity += 1;
-            }
-            ballPos::col += ballProp::velocityX *ellapsedTime;
-            //Assume that energy disappation leaves only half velocity remaining
-            ballProp::velocityX = -reboundVelocity/2;
-        }
-    }   
-    else if(ballProp::velocityX < 0){
-        if(checkLeftCollisions(-ballProp::velocityX)){        
-            ballPos::col += ballProp::velocityX * ellapsedTime;
-        }
-        else{  
-            int reboundVelocity = 0;
-            while(!checkLeftCollisions(-ballProp::velocityX)){
-                ballProp::velocityX += 1;
-                reboundVelocity += 1;
-            }
-            ballPos::col += ballProp::velocityX * ellapsedTime;
-            //Assume that energy disappation leaves only half velocity remaining
-            ballProp::velocityX = reboundVelocity/2;
-        }
-    }
-
-    //Y movement
-    if(( (float)grapple::velocity*sin(grapple::theta*M_PI/180)) > 0)
-        ballProp::velocityY = ceil( grapple::velocity*sin(grapple::theta*M_PI/180));
-    else
-        ballProp::velocityY = floor( grapple::velocity*sin(grapple::theta*M_PI/180));
-
-    
-    if(ballProp::velocityY > 0){
-        if(checkDownCollisions(ballProp::velocityY)){       
-            ballPos::row += ballProp::velocityY * ellapsedTime;
-        }
-        else{
-            int reboundVelocity = 0;
-            while(!checkDownCollisions(ballProp::velocityY)){
-                ballProp::velocityY -= 1;
-                reboundVelocity += 1;
-            }
-            ballPos::row += ballProp::velocityY *ellapsedTime;
-            //Assume that energy disappation leaves only half velocity remaining
-            ballProp::velocityY = -reboundVelocity/2;
-        }
-    }
-    else if(ballProp::velocityY < 0){
-        if(checkUpCollisions(-ballProp::velocityY)){       
-            ballPos::row += ballProp::velocityY * ellapsedTime;
-        }
-        else{
-            int reboundVelocity = 0;
-            while(!checkUpCollisions(-ballProp::velocityY)){
-                ballProp::velocityY += 1;
-                reboundVelocity += 1;
-            }
-            ballPos::row += ballProp::velocityY *ellapsedTime;
-            //Assume that energy disappation leaves only half velocity remaining
-            ballProp::velocityY = reboundVelocity/2;
-        }
+    else{
+        signals::rolling_left1 = false;
+        signals::rolling_left2 = false;
+        signals::rolling_right1 = false;
+        signals::rolling_right2 = false;
+        signals::rolling_counter = 0;
     }
 }
+
+
 
 float max = 0.0;
 float min = 0.0;
@@ -532,36 +579,28 @@ void simulateMovement(int ellapsedTime){
             if(forceBar::xForce == 0 && forceBar::yForce == 0){
                 break;
             }
-            forceCompass::forceUnitVector[2][3] = 1;
             forceCompass::east = true;
             break;
         case 90: 
-            forceCompass::forceUnitVector[1][2] = 1;
             forceCompass::north = true;
             break;
         case 180:
-            forceCompass::forceUnitVector[2][1] = 1;
             forceCompass::west = true;
             break;
         case 270:
-            forceCompass::forceUnitVector[3][2] = 1;
             forceCompass::south = true;
             break;
         default:
             if(theta > 0 && theta < 90){
-                forceCompass::forceUnitVector[1][3] = 1;
                 forceCompass::northe = true;
             }
             else if(theta < 180){
-                forceCompass::forceUnitVector[1][1] = 1;
                 forceCompass::northw = true;
             }
             else if(theta < 270 ){
-                forceCompass::forceUnitVector[3][1] = 1;
                 forceCompass::southw = true;
             }
             else if(theta > 270){
-                forceCompass::forceUnitVector[3][3] = 1;
                 forceCompass::southe = true;
             }
     }

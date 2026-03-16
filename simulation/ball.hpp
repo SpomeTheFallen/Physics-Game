@@ -14,13 +14,13 @@ namespace ballPos{
   
 }
 
+//theta in degrees
 namespace grapple{
     inline float theta = 0;  
     inline float thetaChange = 0;
     inline float thetaMax = 0;
     inline int radius = 0;
     inline float velocity = 0;
-    inline float iVelocity = 0;
     inline int row = 0;
     inline int col = 0;
 } 
@@ -41,7 +41,8 @@ struct signals{
 enum class direction{
     left,
     right,
-    compress
+    compress,
+    uncompress,
 };
 
 namespace forceBar{
@@ -57,7 +58,6 @@ namespace forceBar{
 namespace forceCompass{
     const int row = 30;
     const int col = 81;
-    extern int forceUnitVector[5][5];
     inline bool north = false;
     inline bool northe = false;
     inline bool east = false;

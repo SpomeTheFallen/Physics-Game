@@ -19,7 +19,7 @@ Renderer::Renderer(){
         std::cout << "Error";
 
     /* Create a windowed mode window and its OpenGL context */
-    _window = glfwCreateWindow(800, 800, "Physics Game", NULL, NULL);
+    _window = glfwCreateWindow(1000, 800, "Physics Game", NULL, NULL);
     if (!_window)
     {
         glfwTerminate();
@@ -29,11 +29,12 @@ Renderer::Renderer(){
 
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
-    
+    glfwSwapInterval(100);
+
     if(glewInit() != GLEW_OK){
         std::cout << "Error";
     }
-
+    
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -48,6 +49,10 @@ Renderer::Renderer(){
     
     Texture* normal = new Texture(0);
     Texture* ball = new Texture(1, "Rendering/resources/textures/ball.png");
+    Texture* ball1 = new Texture(11, "Rendering/resources/textures/ball1.png");
+    Texture* ball2 = new Texture(12, "Rendering/resources/textures/ball2.png");
+    Texture* ballc1 = new Texture(13, "Rendering/resources/textures/ballc1.png");
+    Texture* ballc2 = new Texture(14, "Rendering/resources/textures/ballc2.png");
     Texture* c = new Texture(10, "Rendering/resources/textures/compass.png");
     Texture* c1 = new Texture((unsigned int)compassDir::n, "Rendering/resources/textures/compassN.png");
     Texture* c2 = new Texture((unsigned int)compassDir::ne, "Rendering/resources/textures/compassNE.png");
@@ -69,6 +74,10 @@ Renderer::Renderer(){
     _textures.push_back(c6);
     _textures.push_back(c7);
     _textures.push_back(c8);
+    _textures.push_back(ball1);
+    _textures.push_back(ball2);
+    _textures.push_back(ballc1);
+    _textures.push_back(ballc2);
 
     _shader = new Shader("Rendering/resources/Default.shader");
     _shader->SetUniform4f("uColor", .8f, .8f, .8f, 1.0f);
@@ -102,8 +111,23 @@ void Renderer::updateQuads(){
     _quads->makeSquare(4.0f/255, 3.0f/255, 26.0f/255, 1.0f, 0, glm::vec3(43.0f, 17.5f, 0.0f), glm::vec3(86.0f, 35.0f, 1.0f));
 
     //ball
-    _quads->makeSquare(1.0f, 0.0f, 1.0f, 1.0f, 1, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
-   
+    if(signals::rolling_right1)
+        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 11, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+    else if(signals::rolling_right2)
+        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 12, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+    else if(signals::rolling_left1)
+        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 12, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+    else if(signals::rolling_left2)
+        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 11, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+    else if(signals::springed1)
+        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 13, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+    else if(signals::springed2)
+        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 14, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+    else
+        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 1, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+    
+
+
     //level
     _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(l0Prop::cols+.5f, l0Prop::rows/2.0f, 0.0f), glm::vec3(2.0f, l0Prop::rows, 1.0f));
     _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(0.5f, l0Prop::rows/2.0f, 0.0f), glm::vec3(2.0f, l0Prop::rows, 1.0f));
@@ -155,8 +179,6 @@ void Renderer::updateQuads(){
     }
 
    
-
-
     _VAO->Repackage(_quads->Indices().data(), _quads->Indices().size(), _quads->Vertices().data(), _quads->Vertices().size());
 }
 
