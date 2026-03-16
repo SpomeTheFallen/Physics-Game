@@ -58,6 +58,14 @@ namespace forceCompass{
     const int row = 30;
     const int col = 81;
     extern int forceUnitVector[5][5];
+    inline bool north = false;
+    inline bool northe = false;
+    inline bool east = false;
+    inline bool southe = false;
+    inline bool south = false;
+    inline bool southw = false;
+    inline bool west = false;
+    inline bool northw = false;
 }
 
 namespace energyBar{

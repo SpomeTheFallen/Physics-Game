@@ -106,6 +106,14 @@ void resetVector(){
     forceCompass::forceUnitVector[3][1] = 0;
     forceCompass::forceUnitVector[3][2] = 0;
     forceCompass::forceUnitVector[3][3] = 0;
+    forceCompass::north = false;
+    forceCompass::northe = false;
+    forceCompass::east = false;
+    forceCompass::southe = false;
+    forceCompass::south = false;
+    forceCompass::southw = false;
+    forceCompass::west = false;
+    forceCompass::northw = false;
 }
 
 // F = a (since m = 1)
@@ -525,25 +533,37 @@ void simulateMovement(int ellapsedTime){
                 break;
             }
             forceCompass::forceUnitVector[2][3] = 1;
+            forceCompass::east = true;
             break;
         case 90: 
             forceCompass::forceUnitVector[1][2] = 1;
+            forceCompass::north = true;
             break;
         case 180:
             forceCompass::forceUnitVector[2][1] = 1;
+            forceCompass::west = true;
             break;
         case 270:
             forceCompass::forceUnitVector[3][2] = 1;
+            forceCompass::south = true;
             break;
         default:
-            if(theta > 0 && theta < 90)
+            if(theta > 0 && theta < 90){
                 forceCompass::forceUnitVector[1][3] = 1;
-            else if(theta < 180)
+                forceCompass::northe = true;
+            }
+            else if(theta < 180){
                 forceCompass::forceUnitVector[1][1] = 1;
-            else if(theta < 270 )
+                forceCompass::northw = true;
+            }
+            else if(theta < 270 ){
                 forceCompass::forceUnitVector[3][1] = 1;
-            else if(theta > 270)
+                forceCompass::southw = true;
+            }
+            else if(theta > 270){
                 forceCompass::forceUnitVector[3][3] = 1;
+                forceCompass::southe = true;
+            }
     }
 
     //movement functions
