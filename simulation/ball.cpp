@@ -30,45 +30,6 @@ int arctan(int y, int x){
 }
 
 
-// 0 = air, 1 = ball, 2 = ball (texture)
-
-int ball[ballProp::rows][ballProp::cols] = {
-    0, 1, 2, 0,
-    1, 0, 0, 1,
-    1, 0, 0, 1,
-    0, 2, 1, 0,
-};
-
-int ballR1[ballProp::rows][ballProp::cols] = {
-    0, 1, 1, 0,
-    1, 0, 0, 2,
-    2, 0, 0, 1,
-    0, 1, 1, 0,
-};
-
-int ballR2[ballProp::rows][ballProp::cols] = {
-    0, 2, 1, 0,
-    1, 0, 0, 1,
-    1, 0, 0, 2,
-    0, 1, 1, 0,
-};
-
-int ballSpringed1[ballProp::rows][ballProp::cols] = {
-    0, 0, 0, 0,
-    1, 1, 2, 1,
-    1, 0, 0, 1,
-    0, 2, 1, 0,
-};
-
-int ballSpringed2[ballProp::rows][ballProp::cols] = {
-    0, 0, 0, 0,
-    1, 0, 0, 1,
-    1, 1, 2, 1,
-    0, 2, 1, 0,
-};
-
-
-
 //energy
 int energyBar::internal = 100;
 
@@ -264,12 +225,15 @@ bool checkUpCollisions(int velocity){
 void launch_grapple(direction dir){
     grapple::theta = 0;
     grapple::velocity = ballProp::velocityX;
-
+    
     signals::grappled = true;
+    
+    ballProp::velocityX = 0;
+    ballProp::velocityY = 0;
 
     int yRadius = 1;
     while (checkUpCollisions(yRadius+1)){
-        yRadius ++;
+        yRadius ++;   
     }
 
     grapple::radius = (yRadius/cos(grapple::theta*M_PI/180.0)); 
@@ -287,14 +251,8 @@ void launch_grapple(direction dir){
 
 
     grapple::row = ballPos::row - yRadius;
-    grapple::col = ballPos::col + ballProp::cols + ceil(grapple::radius*sin(grapple::theta));
-}
+    grapple::col = ballPos::col + ceil(ballProp::cols/2.0f);
 
-
-void move_up(){
-    if(ballPos::row > 1){
-        ballPos::row -= 1;
-    }
 }
 
 //All energy conserved in swing
@@ -309,34 +267,21 @@ void simulatePendulumMotion(int ellapsedTime){
         grapple::thetaChange = grapple::thetaMax/3;
     
     
-    /*
-    if(grapple::theta > 0)
-        grapple::velocity += ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
-    else if (grapple::theta < 0)
-        grapple::velocity -= ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
-    else if(grapple::thetaChange < 0)
-        grapple::velocity += ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
-    else if(grapple::thetaChange > 0)
-        grapple::velocity -= ceil(sqrt(2*g*(grapple::radius - grapple::radius*cos(grapple::thetaChange*M_PI/180))));
-    */
     float theta_i = grapple::theta;
     float theta_f = theta_i + grapple::thetaChange;
     grapple::theta += grapple::thetaChange;
 
     if(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f*M_PI/180.0f)-cos(theta_i*M_PI/180.0f)) < 0){
-        std::cout << "ERROR! sqrt negative ";
-        std::cout << "\nV: " << grapple::velocity;
-        std::cout << "\nTheta_f: " << theta_f;
-        std::cout << "\nTheta_i: " << theta_i;
         return;
     }
         
 
 
     if(grapple::thetaChange > 0)
-        grapple::velocity = sqrt(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f)-cos(theta_i)));
+        grapple::velocity = sqrt(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f*M_PI/180)-cos(theta_i*M_PI/180)));
     else if (grapple::thetaChange < 0)
-        grapple::velocity = -sqrt(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f)-cos(theta_i)));
+        grapple::velocity = -sqrt(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f*M_PI/180)-cos(theta_i*M_PI/180)));
+
 
     //X movement
     if(( (float)grapple::velocity*cos(grapple::theta*M_PI/180)) > 0)
@@ -351,7 +296,7 @@ void simulatePendulumMotion(int ellapsedTime){
         }
         else{  
             int reboundVelocity = 0;
-            while(!checkRightCollisions(ballProp::velocityX)){
+            while(ballProp::velocityX > 0 && !checkRightCollisions(ballProp::velocityX)){
                 ballProp::velocityX -= 1;
                 reboundVelocity += 1;
             }
@@ -366,7 +311,7 @@ void simulatePendulumMotion(int ellapsedTime){
         }
         else{  
             int reboundVelocity = 0;
-            while(!checkLeftCollisions(-ballProp::velocityX)){
+            while(ballProp::velocityX < 0 && !checkLeftCollisions(-ballProp::velocityX)){
                 ballProp::velocityX += 1;
                 reboundVelocity += 1;
             }

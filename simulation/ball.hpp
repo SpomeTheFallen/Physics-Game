@@ -83,13 +83,5 @@ void executeForce();
 
 void launch_grapple(direction dir);
 
-void move_up();
-
 void simulateMovement(int ellapsedTime = 1);
 
-extern int ball[ballProp::rows][ballProp::cols];
-extern int ballR1[ballProp::rows][ballProp::cols];
-extern int ballR2[ballProp::rows][ballProp::cols];
-
-extern int ballSpringed1[ballProp::rows][ballProp::cols];
-extern int ballSpringed2[ballProp::rows][ballProp::cols];

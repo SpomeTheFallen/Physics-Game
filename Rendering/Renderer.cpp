@@ -126,8 +126,11 @@ void Renderer::updateQuads(){
     else
         _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 1, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
     
-
-
+    //grapple
+    if(signals::grappled){
+        //_quads->makeSquare(1.0f, 0.0f, 1.0f, 1.0f, 0, glm::vec3(grapple::col, 36-grapple::row, 0.0f));
+        _quads->makeSquare(0.2f, 0.2f, 0.2f, 1.0f, 0, glm::vec3((grapple::col+(ball_x+1.5f))/2.0f, (36-grapple::row + (ball_y))/2.0f, 0.0f), glm::vec3(.1f, grapple::radius+2.0f, 1.0f), grapple::theta);
+    }
     //level
     _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(l0Prop::cols+.5f, l0Prop::rows/2.0f, 0.0f), glm::vec3(2.0f, l0Prop::rows, 1.0f));
     _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(0.5f, l0Prop::rows/2.0f, 0.0f), glm::vec3(2.0f, l0Prop::rows, 1.0f));
