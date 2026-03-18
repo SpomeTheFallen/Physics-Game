@@ -31,7 +31,8 @@ int arctan(int y, int x){
 
 
 //energy
-int energyBar::internal = 100;
+const int maxEnergy = 200;
+int energyBar::internal = maxEnergy;
 
 int energyBar::bar[10] = {1,1,1,1,1,1,1,1,1,1};
 
@@ -40,9 +41,9 @@ void transferEnergy(int velocityChange){
     energyChange =  (velocityChange*velocityChange)/2;
     energyBar::internal -= energyChange;
     
-    for(int i = 0 ; i < 100 ; i+=10){
-        if(energyBar::internal < (90 - i)){
-            energyBar::bar[(i/10)] = 0;
+    for(int i = 0 ; i < maxEnergy ; i+=10){
+        if(energyBar::internal < (.9*maxEnergy - i)){
+            energyBar::bar[(int)(i/(maxEnergy*.1))] = 0;
         }
     }
 
@@ -171,7 +172,7 @@ bool checkRightCollisions(int velocity){
     }
     for(int i = ballPos::row; i < (ballPos::row + ballProp::rows-1) ; i++){
         for(int j = ballPos::col-1 ; j < ballPos::col-1 + ballProp::cols + velocity ; j++){
-            if(level0[i][j] == 1){
+            if(l0Prop::level0[i][j] == 1){
                 return false;
             }
         }
@@ -185,7 +186,7 @@ bool checkLeftCollisions(int velocity){
     }
     for(int i = ballPos::row; i < (ballPos::row + ballProp::rows-1) ; i++){
         for(int j = ballPos::col-1-velocity ; j < ballPos::col ; j++){
-            if(level0[i][j] == 1){
+            if(l0Prop::level0[i][j] == 1){
                 return false;
             }
         }
@@ -198,7 +199,7 @@ bool checkDownCollisions(int velocity){
     }
     for(int i = ballPos::row; i < ballPos::row + ballProp::rows-1 + velocity; i++){
         for(int j = ballPos::col - 1 ; j < ballPos::col + ballProp::cols - 1 ; j++){
-            if(level0[i][j] == 1){
+            if(l0Prop::level0[i][j] == 1){
                 return false;
             }
         }
@@ -212,7 +213,7 @@ bool checkUpCollisions(int velocity){
     }
     for(int i = ballPos::row-1 - velocity; i < ballPos::row; i++){
         for(int j = ballPos::col - 1 ; j < ballPos::col + ballProp::cols - 1 ; j++){
-            if(level0[i][j] == 1){
+            if(l0Prop::level0[i][j] == 1){
                 return false;
             }
         }
