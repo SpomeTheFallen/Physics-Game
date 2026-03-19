@@ -4,10 +4,13 @@ namespace homescreen{
     };
 }
 
-namespace l0Prop{
+namespace levels{
     const int rows = 35;
     const int cols = 75;
-    extern int level0[l0Prop::rows][l0Prop::cols]; 
+    extern int level0[levels::rows][levels::cols];
+    extern int level1[levels::rows][levels::cols];
+    void setLevel0();
+    bool levelCompleted();
 }
 
 

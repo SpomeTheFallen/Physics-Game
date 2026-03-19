@@ -15,6 +15,7 @@ void homeScreenLoop(Renderer &renderer){
         keyPress = true; 
         //TRANSITION STATE   
         if(homescreen::signals::B1selected && renderer.readKey(GLFW_KEY_ENTER)){
+            levels::setLevel0();
             renderer.setRender(RenderType::Level0);
         }
 
@@ -34,6 +35,9 @@ void homeScreenLoop(Renderer &renderer){
 void basicGameLoop(Renderer &renderer){
     renderer.render();    
     simulateMovement();
+    if(levels::levelCompleted()){
+        renderer.setRender(RenderType::HomeScreen);
+    }
         
     if(nextKeyTime <= std::chrono::steady_clock::now()){
         keyPress = true; 

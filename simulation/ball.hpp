@@ -1,16 +1,16 @@
 namespace ballProp{
     const int rows = 4;
     const int cols = 4;
-    extern int velocityX;
-    extern int velocityY;
-    extern int accelerationX;
-    extern int accelerationY;
+    extern float velocityX;
+    extern float velocityY;
+    extern float accelerationX;
+    extern float accelerationY;
 }
 
 //marks the balls highest and most left points relative to terminal grid.
 namespace ballPos{
-    inline int col = 1;
-    inline int row = 1;
+    inline float col = 1.0f;
+    inline float row = 1.0f;
   
 }
 
@@ -48,9 +48,9 @@ enum class direction{
 namespace forceBar{
     const int row = 15;
     const int col = 79;
-    extern int xForce;
-    extern int yForce;
-    extern int force;
+    extern float xForce;
+    extern float yForce;
+    extern float force;
     extern int bar[10];
     
 }
@@ -71,11 +71,11 @@ namespace forceCompass{
 namespace energyBar{
     const int col = 79;
     const int row = 3;
-    extern int internal;
+    extern float internal;
     extern int bar[10];
 }
 
-void transferEnergy(int velocityChange);
+void transferEnergy(float velocityChange);
 
 void chargeForce(direction dir);
 
@@ -83,5 +83,5 @@ void executeForce();
 
 void launch_grapple(direction dir);
 
-void simulateMovement(int ellapsedTime = 1);
+void simulateMovement(float ellapsedTime = 1);
 
