@@ -164,7 +164,7 @@ bool checkRightCollisions(float velocity){
         return false;
     }
     for(int i = round(ballPos::row); i < round(ballPos::row + ballProp::rows-1) ; i++){
-        for(int j = ceil(ballPos::col-1) ; j < ceil(ballPos::col-1 + ballProp::cols + velocity) ; j++){
+        for(int j = ceil(ballPos::col-1) ; j < ceil(ballPos::col + ballProp::cols-1 + velocity) ; j++){
             if(levels::currentLevel[i][j] == 1){
                 return false;
             }

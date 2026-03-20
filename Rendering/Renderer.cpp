@@ -121,7 +121,7 @@ void Renderer::updateQuads(){
         }
         break;
         case RenderType::currentLevel:{
-            float ball_x = ballPos::col;
+            float ball_x = ballPos::col + .5;
             float ball_y = levels::rows-1 - ballPos::row;
             _quads->clear();
             //background
@@ -154,6 +154,10 @@ void Renderer::updateQuads(){
                     else if(levels::currentLevel[i][j] == 2){
                          _quads->makeSquare(0.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(2.0f, 1.0f, 1.0f));
                     }
+                    else if(levels::currentLevel[i][j] == 4){
+                         _quads->makeSquare(1.0f, 0.0f, 0.0f, 1.0f, 0, glm::vec3(j+2.0f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+                    }
+
                 }
             }
 
