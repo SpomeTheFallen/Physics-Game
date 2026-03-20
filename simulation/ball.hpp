@@ -8,7 +8,7 @@ namespace ballProp{
     inline float theta = 0.0f;
 }
 
-//marks the balls highest and most left points relative to terminal grid.
+//marks the balls highest and most left points relative to rendering grid.
 namespace ballPos{
     inline float col = 1.0f;
     inline float row = 1.0f;

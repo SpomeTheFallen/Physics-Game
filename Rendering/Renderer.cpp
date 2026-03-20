@@ -121,8 +121,8 @@ void Renderer::updateQuads(){
         }
         break;
         case RenderType::currentLevel:{
-            float ball_x = ballPos::col + .5;
-            float ball_y = levels::rows-1 - ballPos::row;
+            float ball_x = ballPos::col+2.0f;
+            float ball_y = levels::rows+1.5f - (ballPos::row+2.0f);
             _quads->clear();
             //background
             
@@ -136,26 +136,26 @@ void Renderer::updateQuads(){
                 ballTex = 3;
             else
                 ballTex = 1;
-            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, ballTex, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f), ballProp::theta);
+            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, ballTex, glm::vec3(ball_x, ball_y, 0.0f), glm::vec3(4.0f, 4.0f, 1.0f), ballProp::theta);
             //grapple
             if(signals::grappled){
                 _quads->makeSquare(0.2f, 0.2f, 0.2f, 1.0f, 0, glm::vec3((grapple::col+(ball_x+1.5f))/2.0f, (36-grapple::row + (ball_y))/2.0f, 0.0f), glm::vec3(.1f, grapple::radius+2.0f, 1.0f), grapple::theta), glm::vec3(0.0f, (grapple::radius+2.0f)/2.0f, 0.0f);
             }
             //level
-            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(levels::cols+.5f, levels::rows/2.0f, 0.0f), glm::vec3(2.0f, levels::rows, 1.0f));
-            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(0.5f, levels::rows/2.0f, 0.0f), glm::vec3(2.0f, levels::rows, 1.0f));
+            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(levels::cols+.5f, levels::rows/2.0f, 0.0f), glm::vec3(1.0f, levels::rows, 1.0f));
+            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(0.5f, levels::rows/2.0f, 0.0f), glm::vec3(1.0f, levels::rows, 1.0f));
             _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(levels::cols/2.0f, 0.0f, 0.0f), glm::vec3(levels::cols, 1.0f, 1.0f));
 
             for(int i = 0; i < levels::rows ; i++){
                 for(int j = 0; j < levels::cols ; j++){
                     if(levels::currentLevel[i][j] == 1){
-                        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(2.0f, 1.0f, 1.0f));
+                        _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
                     }
                     else if(levels::currentLevel[i][j] == 2){
-                         _quads->makeSquare(0.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(2.0f, 1.0f, 1.0f));
+                         _quads->makeSquare(0.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
                     }
                     else if(levels::currentLevel[i][j] == 4){
-                         _quads->makeSquare(1.0f, 0.0f, 0.0f, 1.0f, 0, glm::vec3(j+2.0f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+                         _quads->makeSquare(1.0f, 0.0f, 0.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
                     }
 
                 }
