@@ -152,10 +152,10 @@ void Renderer::updateQuads(){
                         _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
                     }
                     else if(levels::currentLevel[i][j] == 2){
-                         _quads->makeSquare(0.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+                        _quads->makeSquare(0.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
                     }
                     else if(levels::currentLevel[i][j] == 4){
-                         _quads->makeSquare(1.0f, 0.0f, 0.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+                        _quads->makeSquare(1.0f, 0.0f, 0.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
                     }
 
                 }

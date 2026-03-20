@@ -8,6 +8,7 @@
 
 auto nextKeyTime = std::chrono::steady_clock::now();
 bool keyPress = false;
+levelType selectedLevel;
 
 void homeScreenLoop(Renderer &renderer){
     renderer.render();
@@ -15,14 +16,17 @@ void homeScreenLoop(Renderer &renderer){
         keyPress = true; 
         //TRANSITION STATE   
         if((homescreen::row == 0 && homescreen::col == 0) && renderer.readKey(GLFW_KEY_ENTER)){
+            selectedLevel = levelType::level0;
             levels::setLevel(levelType::level0);
             renderer.setRender(RenderType::currentLevel);
         }
         else if((homescreen::row == 0 && homescreen::col == 1) && renderer.readKey(GLFW_KEY_ENTER)){
+            selectedLevel = levelType::level1;
             levels::setLevel(levelType::level1);
             renderer.setRender(RenderType::currentLevel);
         }
         else if((homescreen::row == 1 && homescreen::col == 0) && renderer.readKey(GLFW_KEY_ENTER)){
+            selectedLevel = levelType::level2;
             levels::setLevel(levelType::level2);
             renderer.setRender(RenderType::currentLevel);
         }
@@ -47,8 +51,11 @@ void homeScreenLoop(Renderer &renderer){
 void basicGameLoop(Renderer &renderer){
     renderer.render();    
     simulateMovement();
-    if(levels::levelCompleted()){
+    if(levels::levelCheck() == levelStatus::completed){
         renderer.setRender(RenderType::HomeScreen);
+    }
+    else if(levels::levelCheck() == levelStatus::restart){
+        levels::setLevel(selectedLevel);
     }
         
     if(nextKeyTime <= std::chrono::steady_clock::now()){
@@ -66,8 +73,7 @@ void basicGameLoop(Renderer &renderer){
             else if (renderer.readKey(GLFW_KEY_S)) chargeForce(direction::compress);
             else if (renderer.readKey(GLFW_KEY_E)) executeForce();
             else if (renderer.readKey(GLFW_KEY_G)) launch_grapple(); 
-            else if (renderer.readKey(GLFW_KEY_R)) {ballPos::row = 1 ; ballPos::col = 1; energyBar::internal = 200;}
-            else if (renderer.readKey(GLFW_KEY_V)) {energyBar::internal = 200;}
+            else if (renderer.readKey(GLFW_KEY_R)) levels::setLevel(selectedLevel);
             else{
                 keyPress = false;
             }

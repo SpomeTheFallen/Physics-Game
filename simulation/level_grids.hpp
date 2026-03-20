@@ -9,12 +9,18 @@ enum class levelType{
     level2
 };
 
+enum class levelStatus{
+    completed,
+    restart,
+    inprogress
+};
+
 namespace levels{
     const int rows = 35;
     const int cols = 75;
     extern int (*currentLevel)[levels::cols];
     void setLevel(levelType type);
-    bool levelCompleted();
+    levelStatus levelCheck();
 }
 
 

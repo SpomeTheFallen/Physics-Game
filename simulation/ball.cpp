@@ -238,9 +238,9 @@ void launch_grapple(){
     grapple::thetaMax = acos((1-ratio)) * 180.0/M_PI;
 
    if(grapple::velocity > 0)
-        grapple::thetaChange = grapple::thetaMax/3;
+        grapple::thetaChange = grapple::thetaMax/5;
     else if(grapple::velocity < 0)
-        grapple::thetaChange = -grapple::thetaMax/3;
+        grapple::thetaChange = -grapple::thetaMax/5;
     
     grapple::row = ballPos::row - yRadius;
     grapple::col = ballPos::col + ballProp::cols/2.0f;
@@ -254,9 +254,9 @@ void simulatePendulumMotion(float ellapsedTime){
     theta(t) = theta_i + thetaIncrement; 
     */ 
     if(grapple::theta >= grapple::thetaMax)
-        grapple::thetaChange = -grapple::thetaMax/3;
+        grapple::thetaChange = -grapple::thetaMax/5;
     else if(grapple::theta <= -grapple::thetaMax)
-        grapple::thetaChange = grapple::thetaMax/3;
+        grapple::thetaChange = grapple::thetaMax/5;
 
     float theta_i = grapple::theta;
     float theta_f = theta_i + grapple::thetaChange;
@@ -313,9 +313,7 @@ void simulatePendulumMotion(float ellapsedTime){
     //Y movement
     
     ballProp::velocityY = -grapple::velocity*sin(grapple::theta*M_PI/180);
- 
-
-    
+     
     if(ballProp::velocityY > 0){
         if(checkDownCollisions(ballProp::velocityY)){       
             ballPos::row += ballProp::velocityY * ellapsedTime;
