@@ -8,7 +8,9 @@ Quads::Quads(){
     _types.push_back({8, 9, 1});
 }
 
-void Quads::makeSquare(float r, float g, float b, float a, float textureIndex, glm::vec3 translation, glm::vec3 size, float degrees){
+void Quads::makeSquare(float r, float g, float b, float a, float textureIndex, glm::vec3 translation, glm::vec3 size, 
+                       float degrees, glm::vec3 postRotTranslation)
+    {
     unsigned int indices[6] ={
         0 , 1 , 2,
         2, 1, 3,
@@ -32,6 +34,7 @@ void Quads::makeSquare(float r, float g, float b, float a, float textureIndex, g
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, translation);
     model = glm::rotate(model, glm::radians(degrees), glm::vec3(0,0,1));
+    model = glm::translate(model, postRotTranslation);
     model = glm::scale(model, size);
 
     for(int i = 0; i < 4; i++)

@@ -7,10 +7,10 @@ using std::sqrt; using std::round; using std::atan; using std::cos; using std::s
 
 float g = 2;
 
-int arctan(int y, int x){
-    int theta = 0;
+float arctan(float y, float x){
+    float theta = 0;
     if(x != 0){
-        theta = round(atan(y/x) * (180.0/(M_PI)));
+        theta = atan(y/x) * (180.0/(M_PI));
     }
     
     if(x < 0){
@@ -51,19 +51,6 @@ void transferEnergy(float velocityChange){
     }
 }
 //---force---
-
-//2 = compass border, 1 = vector, 0 = space
-
-void resetVector(){
-    forceCompass::north = false;
-    forceCompass::northe = false;
-    forceCompass::east = false;
-    forceCompass::southe = false;
-    forceCompass::south = false;
-    forceCompass::southw = false;
-    forceCompass::west = false;
-    forceCompass::northw = false;
-}
 
 // F = a (since m = 1)
 float forceBar::force = 0;
@@ -149,14 +136,10 @@ void executeForce(){
 
 
 //move signals
-bool signals::rolling_right1 = false;
-bool signals::rolling_right2 = false;
-bool signals::rolling_left1 = false;
-bool signals::rolling_left2 = false;
 bool signals::springed1 = false;
 bool signals::springed2 = false;
 bool signals::grappled = false;
-int signals::rolling_counter = 0;
+
 
 //velocities
 float ballProp::velocityX = 0;
@@ -181,7 +164,7 @@ bool checkRightCollisions(float velocity){
     }
     for(int i = round(ballPos::row); i < round(ballPos::row + ballProp::rows-1) ; i++){
         for(int j = ceil(ballPos::col-1) ; j < ceil(ballPos::col-1 + ballProp::cols + velocity) ; j++){
-            if(levels::level0[i][j] == 1){
+            if(levels::currentLevel[i][j] == 1){
                 return false;
             }
         }
@@ -195,7 +178,7 @@ bool checkLeftCollisions(float velocity){
     }
     for(int i = round(ballPos::row); i < round(ballPos::row + ballProp::rows-1) ; i++){
         for(int j = floor(ballPos::col-1-velocity) ; j < floor(ballPos::col) ; j++){
-            if(levels::level0[i][j] == 1){
+            if(levels::currentLevel[i][j] == 1){
                 return false;
             }
         }
@@ -208,7 +191,7 @@ bool checkDownCollisions(float velocity){
     }
     for(int i = ceil(ballPos::row); i < ceil(ballPos::row + ballProp::rows-1 + velocity); i++){
         for(int j = round(ballPos::col - 1) ; j <  round(ballPos::col + ballProp::cols - 1) ; j++){
-            if(levels::level0[i][j] == 1){
+            if(levels::currentLevel[i][j] == 1){
                 return false;
             }
         }
@@ -222,7 +205,7 @@ bool checkUpCollisions(float velocity){
     }
     for(int i = floor(ballPos::row-1 - velocity); i < floor(ballPos::row); i++){
         for(int j = round(ballPos::col - 1) ; j < round(ballPos::col + ballProp::cols - 1) ; j++){
-            if(levels::level0[i][j] == 1){
+            if(levels::currentLevel[i][j] == 1){
                 return false;
             }
         }
@@ -232,7 +215,7 @@ bool checkUpCollisions(float velocity){
 
 //---grapple---
 
-void launch_grapple(direction dir){
+void launch_grapple(){
     grapple::theta = 0;
     grapple::velocity = ballProp::velocityX;
     
@@ -253,12 +236,8 @@ void launch_grapple(direction dir){
         
     grapple::thetaMax = acos((1-ratio)) * 180.0/M_PI;
 
-    switch (dir){
-        case direction::right:
-            grapple::thetaChange = grapple::thetaMax/3;
-            break;
-    }
-
+   
+    grapple::thetaChange = grapple::thetaMax/3;
 
     grapple::row = ballPos::row - yRadius;
     grapple::col = ballPos::col + ballProp::cols/2.0f;
@@ -450,17 +429,8 @@ void simulateHorizontalMovement(float ellapsedTime){
 
             ballPos::col += ballProp::velocityX * ellapsedTime;
 
-
-            if(signals::rolling_counter == 0){
-                signals::rolling_right1 = true;
-                signals::rolling_right2 = false;
-            }
-            else if(signals::rolling_counter == 3){
-                signals::rolling_right1 = false;
-                signals::rolling_right2 = true;
-                signals::rolling_counter = -3;
-            }
-            signals::rolling_counter++;
+            float r = 2.0f;
+            ballProp::theta -= (ballProp::velocityX/r)*180.0f/M_PI;
         }
         else{  
             float reboundVelocity = 0;
@@ -475,24 +445,13 @@ void simulateHorizontalMovement(float ellapsedTime){
                 }
             }
             ballPos::col += ballProp::velocityX *ellapsedTime;
+            float r = 2.0f;
+            ballProp::theta -= (ballProp::velocityX/r)*180.0f/M_PI;
             //Assume that energy disappation leaves only half velocity remaining
             if(reboundVelocity/2.0f < .5f)
                 ballProp::velocityX = 0;
             else
                 ballProp::velocityX = -reboundVelocity/2.0f;
-
-
-            if(signals::rolling_counter == 0){
-                signals::rolling_right1 = true;
-                signals::rolling_right2 = false;
-            }
-            else if(signals::rolling_counter == 3){
-                signals::rolling_right1 = false;
-                signals::rolling_right2 = true;
-                signals::rolling_counter = -3;
-            }
-            signals::rolling_counter++;
-            
         }
     }   
     else if(ballProp::velocityX < 0){
@@ -500,17 +459,8 @@ void simulateHorizontalMovement(float ellapsedTime){
 
             ballPos::col += ballProp::velocityX * ellapsedTime;
         
-            if(signals::rolling_counter == 0){
-                signals::rolling_left1 = true;
-                signals::rolling_left2 = false;
-            }
-            else if(signals::rolling_counter == 3){
-                signals::rolling_left1 = false;
-                signals::rolling_left2 = true;
-                signals::rolling_counter = -3;
-            }
-            signals::rolling_counter++;
-
+            float r = 2.0f;
+            ballProp::theta -= (ballProp::velocityX/r)*180.0f/M_PI;
         }
         else{  
             float reboundVelocity = 0;
@@ -525,83 +475,24 @@ void simulateHorizontalMovement(float ellapsedTime){
                 }
             }
             ballPos::col += ballProp::velocityX * ellapsedTime;
+            float r = 2.0f;
+            ballProp::theta -= (ballProp::velocityX/r)*180.0f/M_PI;       
 
             //Assume that energy disappation leaves only half velocity remaining
             if(reboundVelocity/2.0f < .5f)
                 ballProp::velocityX = 0;
             else
-                ballProp::velocityX = reboundVelocity/2.0f;
-
-            if(signals::rolling_counter == 0){
-                signals::rolling_left1 = true;
-                signals::rolling_left2 = false;
-            }
-            else if(signals::rolling_counter == 3){
-                signals::rolling_left1 = false;
-                signals::rolling_left2 = true;
-                signals::rolling_counter = -3;
-            }
-            signals::rolling_counter++;
-
-           
+                ballProp::velocityX = reboundVelocity/2.0f;    
         }
-    }
-    else{
-        signals::rolling_left1 = false;
-        signals::rolling_left2 = false;
-        signals::rolling_right1 = false;
-        signals::rolling_right2 = false;
-        signals::rolling_counter = 0;
+
     }
 }
 
 
-
-float max = 0.0;
-float min = 0.0;
-
 void simulateMovement(float ellapsedTime){
-    //using unit circle, find the direction in rad or degree of force to then map it on a compass
-    
-    int theta = arctan(forceBar::yForce, forceBar::xForce);
-    
-    
-    if(ballProp::velocityX > max) max = ballProp::velocityX;
-    if(ballProp::velocityX < min) min = ballProp::velocityX;
-    
     //force compass
-    resetVector();
-    switch (theta){
-        case 0:
-            //check if net force is 0.
-            if(forceBar::xForce == 0 && forceBar::yForce == 0){
-                break;
-            }
-            forceCompass::east = true;
-            break;
-        case 90: 
-            forceCompass::north = true;
-            break;
-        case 180:
-            forceCompass::west = true;
-            break;
-        case 270:
-            forceCompass::south = true;
-            break;
-        default:
-            if(theta > 0 && theta < 90){
-                forceCompass::northe = true;
-            }
-            else if(theta < 180){
-                forceCompass::northw = true;
-            }
-            else if(theta < 270 ){
-                forceCompass::southw = true;
-            }
-            else if(theta > 270){
-                forceCompass::southe = true;
-            }
-    }
+    forceCompass::theta = arctan(forceBar::yForce, forceBar::xForce);
+    
 
     //movement functions
     if(signals::grappled){

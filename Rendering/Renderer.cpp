@@ -3,17 +3,6 @@
 #include "../simulation/ball.hpp"
 #include "../simulation/level_grids.hpp"
 
-enum class compassDir{
-    n = 2,
-    ne,
-    e,
-    se,
-    s,
-    sw,
-    w,
-    nw
-};
-
 Renderer::Renderer(){
     if (!glfwInit())
         std::cout << "Error";
@@ -78,39 +67,19 @@ void Renderer::setRender(RenderType type){
             _shader->SetUniform1iv("uTexture", samplerSize, samplers);
         }
         break;
-        case RenderType::Level0:{  
+        case RenderType::currentLevel:{  
             glm::mat4 proj = glm::ortho(0.0f, 86.0f, 0.0f, 35.0f, -1.0f, 1.0f);
             _shader->SetUniformMat4f("uProj", proj);
 
             Texture* normal = new Texture(0);
             Texture* ball = new Texture(1, "Rendering/resources/textures/ball.png");
-            Texture* ball1 = new Texture(11, "Rendering/resources/textures/ball1.png");
-            Texture* ball2 = new Texture(12, "Rendering/resources/textures/ball2.png");
-            Texture* ballc1 = new Texture(13, "Rendering/resources/textures/ballc1.png");
-            Texture* ballc2 = new Texture(14, "Rendering/resources/textures/ballc2.png");
-            Texture* c = new Texture(10, "Rendering/resources/textures/compass.png");
-            Texture* c1 = new Texture((unsigned int)compassDir::n, "Rendering/resources/textures/compassN.png");
-            Texture* c2 = new Texture((unsigned int)compassDir::ne, "Rendering/resources/textures/compassNE.png");
-            Texture* c3 = new Texture((unsigned int)compassDir::e, "Rendering/resources/textures/compassE.png");
-            Texture* c4 = new Texture((unsigned int)compassDir::se, "Rendering/resources/textures/compassSE.png");
-            Texture* c5 = new Texture((unsigned int)compassDir::s, "Rendering/resources/textures/compassS.png");
-            Texture* c6 = new Texture((unsigned int)compassDir::sw, "Rendering/resources/textures/compassSW.png");
-            Texture* c7 = new Texture((unsigned int)compassDir::w, "Rendering/resources/textures/compassW.png");
-            Texture* c8 = new Texture((unsigned int)compassDir::nw, "Rendering/resources/textures/compassNW.png");
+            Texture* ballc1 = new Texture(2, "Rendering/resources/textures/ballc1.png");
+            Texture* ballc2 = new Texture(3, "Rendering/resources/textures/ballc2.png");
+            Texture* compass = new Texture(4, "Rendering/resources/textures/compass.png");
 
             _textures.push_back(normal);
             _textures.push_back(ball);
-            _textures.push_back(c);
-            _textures.push_back(c1);
-            _textures.push_back(c2);
-            _textures.push_back(c3);
-            _textures.push_back(c4);
-            _textures.push_back(c5);
-            _textures.push_back(c6);
-            _textures.push_back(c7);
-            _textures.push_back(c8);
-            _textures.push_back(ball1);
-            _textures.push_back(ball2);
+            _textures.push_back(compass);
             _textures.push_back(ballc1);
             _textures.push_back(ballc2);
 
@@ -143,7 +112,7 @@ void Renderer::updateQuads(){
             _VAO->Repackage(_quads->Indices().data(), _quads->Indices().size(), _quads->Vertices().data(), _quads->Vertices().size());
         }
         break;
-        case RenderType::Level0:{
+        case RenderType::currentLevel:{
             float ball_x = ballPos::col;
             float ball_y = levels::rows-1 - ballPos::row;
             _quads->clear();
@@ -153,25 +122,20 @@ void Renderer::updateQuads(){
 
             //ball
             int ballTex;
-            if(signals::rolling_right1)
-                ballTex = 11;
-            else if(signals::rolling_right2)
-                ballTex = 12;
-            else if(signals::rolling_left1)
-                ballTex = 12;
-            else if(signals::rolling_left2)
-                ballTex = 11;
-            else if(signals::springed1)
-                ballTex = 13;
-            else if(signals::springed2)
-                ballTex = 14;
+            if(signals::springed1){
+                ballTex = 2;
+                ballProp::theta = 0;
+            }
+            else if(signals::springed2){
+                ballTex = 3;
+                ballProp::theta = 0;
+            }
             else
                 ballTex = 1;
-            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, ballTex, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f));
+            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, ballTex, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f), ballProp::theta);
             //grapple
             if(signals::grappled){
-                //_quads->makeSquare(1.0f, 0.0f, 1.0f, 1.0f, 0, glm::vec3(grapple::col, 36-grapple::row, 0.0f));
-                _quads->makeSquare(0.2f, 0.2f, 0.2f, 1.0f, 0, glm::vec3((grapple::col+(ball_x+1.5f))/2.0f, (36-grapple::row + (ball_y))/2.0f, 0.0f), glm::vec3(.1f, grapple::radius+2.0f, 1.0f), grapple::theta);
+                _quads->makeSquare(0.2f, 0.2f, 0.2f, 1.0f, 0, glm::vec3((grapple::col+(ball_x+1.5f))/2.0f, (36-grapple::row + (ball_y))/2.0f, 0.0f), glm::vec3(.1f, grapple::radius+2.0f, 1.0f), grapple::theta), glm::vec3(0.0f, (grapple::radius+2.0f)/2.0f, 0.0f);
             }
             //level
             _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(levels::cols+.5f, levels::rows/2.0f, 0.0f), glm::vec3(2.0f, levels::rows, 1.0f));
@@ -180,37 +144,21 @@ void Renderer::updateQuads(){
 
             for(int i = 0; i < levels::rows ; i++){
                 for(int j = 0; j < levels::cols ; j++){
-                    if(levels::level0[i][j] == 1){
+                    if(levels::currentLevel[i][j] == 1){
                         _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(2.0f, 1.0f, 1.0f));
                     }
-                    else if(levels::level0[i][j] == 2){
+                    else if(levels::currentLevel[i][j] == 2){
                          _quads->makeSquare(0.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(j+1.5f, levels::rows-i, 0.0f), glm::vec3(2.0f, 1.0f, 1.0f));
                     }
                 }
             }
 
             //force compass
-            int compassTex;
-            if(forceCompass::north)
-                compassTex = (int)compassDir::n;
-            else if(forceCompass::northe)
-                compassTex = (int)compassDir::ne;
-            else if(forceCompass::northw)
-                compassTex = (int)compassDir::nw;
-            else if(forceCompass::east)
-                compassTex = (int)compassDir::e;
-            else if(forceCompass::southe)
-                compassTex = (int)compassDir::se;
-            else if(forceCompass::south)
-                compassTex = (int)compassDir::s;
-            else if(forceCompass::southw)
-                compassTex = (int)compassDir::sw;
-            else if(forceCompass::west)
-                compassTex = (int)compassDir::w;
-            else    
-                compassTex = 10;
-            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, compassTex, glm::vec3(forceCompass::col, 35-forceCompass::row-.5f, 0.0f), glm::vec3(5.0f, 5.0f, 1.0f));
+            _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 4, glm::vec3(forceCompass::col, 35-forceCompass::row-.5f, 0.0f), glm::vec3(5.0f, 5.0f, 1.0f));
+            if(forceBar::force > 0)
+                _quads->makeSquare(1.0f, 0.0f, 1.0f, 1.0f, 0, glm::vec3(forceCompass::col, 35-forceCompass::row-.5f, 0.0f), glm::vec3(2.5f, .2f, 1.0f), forceCompass::theta, glm::vec3(2.5f/2.0f, 0.0f, 0.0f));
             
+
             //energy bar
             _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(energyBar::col-1, 35-energyBar::row-4.5f, 0.0f), glm::vec3(.5f, 10.0f, 1.0f));
             _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(energyBar::col+1, 35-energyBar::row-4.5f, 0.0f), glm::vec3(.5f, 10.0f, 1.0f));

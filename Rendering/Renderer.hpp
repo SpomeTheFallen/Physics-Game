@@ -10,7 +10,7 @@
 
 enum class RenderType{
     HomeScreen,
-    Level0,
+    currentLevel,
 };
 
 

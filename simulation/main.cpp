@@ -16,7 +16,11 @@ void homeScreenLoop(Renderer &renderer){
         //TRANSITION STATE   
         if(homescreen::signals::B1selected && renderer.readKey(GLFW_KEY_ENTER)){
             levels::setLevel0();
-            renderer.setRender(RenderType::Level0);
+            renderer.setRender(RenderType::currentLevel);
+        }
+        else if(homescreen::signals::B1selected && renderer.readKey(GLFW_KEY_E)){
+            levels::setLevel1();
+            renderer.setRender(RenderType::currentLevel);
         }
 
         //Non-transition key checking
@@ -53,7 +57,7 @@ void basicGameLoop(Renderer &renderer){
             else if (renderer.readKey(GLFW_KEY_W)) chargeForce(direction::uncompress);
             else if (renderer.readKey(GLFW_KEY_S)) chargeForce(direction::compress);
             else if (renderer.readKey(GLFW_KEY_E)) executeForce();
-            else if (renderer.readKey(GLFW_KEY_G)) launch_grapple(direction::right); 
+            else if (renderer.readKey(GLFW_KEY_G)) launch_grapple(); 
             else if (renderer.readKey(GLFW_KEY_R)) {ballPos::row = 1 ; ballPos::col = 1; energyBar::internal = 200;}
             else if (renderer.readKey(GLFW_KEY_V)) {energyBar::internal = 200;}
             else{
@@ -62,7 +66,11 @@ void basicGameLoop(Renderer &renderer){
         }
         else if(signals::grappled){
             if(renderer.readKey(GLFW_KEY_G)) signals::grappled = false; 
-            else if (renderer.readKey(GLFW_KEY_R)) {ballPos::row = 1 ; ballPos::col = 1;}
+            else if(renderer.readKey(GLFW_KEY_D)) chargeForce(direction::right);
+            else if (renderer.readKey(GLFW_KEY_A)) chargeForce(direction::left);
+            else if (renderer.readKey(GLFW_KEY_W)) chargeForce(direction::uncompress);
+            else if (renderer.readKey(GLFW_KEY_S)) chargeForce(direction::compress);
+            else if (renderer.readKey(GLFW_KEY_E)) executeForce();
             else{
                 keyPress = false;
             }
@@ -84,7 +92,7 @@ int main(){
             break;  
         else if(renderer.currentRender() == RenderType::HomeScreen)
             homeScreenLoop(renderer);
-        else if(renderer.currentRender() == RenderType::Level0)    
+        else if(renderer.currentRender() == RenderType::currentLevel)    
             basicGameLoop(renderer);
         
     }

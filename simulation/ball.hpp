@@ -5,6 +5,7 @@ namespace ballProp{
     extern float velocityY;
     extern float accelerationX;
     extern float accelerationY;
+    inline float theta = 0.0f;
 }
 
 //marks the balls highest and most left points relative to terminal grid.
@@ -27,12 +28,6 @@ namespace grapple{
 
 
 struct signals{
-    static int rolling_counter;
-
-    static bool rolling_right1;
-    static bool rolling_right2;
-    static bool rolling_left1;
-    static bool rolling_left2;
     static bool springed1;
     static bool springed2;
     static bool grappled;
@@ -58,14 +53,7 @@ namespace forceBar{
 namespace forceCompass{
     const int row = 30;
     const int col = 81;
-    inline bool north = false;
-    inline bool northe = false;
-    inline bool east = false;
-    inline bool southe = false;
-    inline bool south = false;
-    inline bool southw = false;
-    inline bool west = false;
-    inline bool northw = false;
+    inline float theta = 0.0f;
 }
 
 namespace energyBar{
@@ -81,7 +69,7 @@ void chargeForce(direction dir);
 
 void executeForce();
 
-void launch_grapple(direction dir);
+void launch_grapple();
 
 void simulateMovement(float ellapsedTime = 1);
 
