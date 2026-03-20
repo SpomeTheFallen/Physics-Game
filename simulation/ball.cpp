@@ -93,6 +93,7 @@ void chargeForce(direction dir){
         else if(forceBar::yForce > 0){
             signals::springed1 = true;
             signals::springed2 = false;
+            ballProp::theta = 0;
         }
         else
             signals::springed1 = false;
@@ -236,9 +237,11 @@ void launch_grapple(){
         
     grapple::thetaMax = acos((1-ratio)) * 180.0/M_PI;
 
-   
-    grapple::thetaChange = grapple::thetaMax/3;
-
+   if(grapple::velocity > 0)
+        grapple::thetaChange = grapple::thetaMax/3;
+    else if(grapple::velocity < 0)
+        grapple::thetaChange = -grapple::thetaMax/3;
+    
     grapple::row = ballPos::row - yRadius;
     grapple::col = ballPos::col + ballProp::cols/2.0f;
 
@@ -254,11 +257,10 @@ void simulatePendulumMotion(float ellapsedTime){
         grapple::thetaChange = -grapple::thetaMax/3;
     else if(grapple::theta <= -grapple::thetaMax)
         grapple::thetaChange = grapple::thetaMax/3;
-    
-    
+
     float theta_i = grapple::theta;
     float theta_f = theta_i + grapple::thetaChange;
-    grapple::theta += grapple::thetaChange;
+    grapple::theta = theta_f;
 
     if(grapple::velocity*grapple::velocity + 2*g*grapple::radius*(cos(theta_f*M_PI/180.0f)-cos(theta_i*M_PI/180.0f)) < 0){
         return;
@@ -430,7 +432,7 @@ void simulateHorizontalMovement(float ellapsedTime){
             ballPos::col += ballProp::velocityX * ellapsedTime;
 
             float r = 2.0f;
-            ballProp::theta -= (ballProp::velocityX/r)*180.0f/M_PI;
+            ballProp::theta -= (ballProp::velocityX/r * ellapsedTime)*180.0f/M_PI ;
         }
         else{  
             float reboundVelocity = 0;
@@ -446,7 +448,7 @@ void simulateHorizontalMovement(float ellapsedTime){
             }
             ballPos::col += ballProp::velocityX *ellapsedTime;
             float r = 2.0f;
-            ballProp::theta -= (ballProp::velocityX/r)*180.0f/M_PI;
+            ballProp::theta -= (ballProp::velocityX/r * ellapsedTime)*180.0f/M_PI;
             //Assume that energy disappation leaves only half velocity remaining
             if(reboundVelocity/2.0f < .5f)
                 ballProp::velocityX = 0;
@@ -460,7 +462,7 @@ void simulateHorizontalMovement(float ellapsedTime){
             ballPos::col += ballProp::velocityX * ellapsedTime;
         
             float r = 2.0f;
-            ballProp::theta -= (ballProp::velocityX/r)*180.0f/M_PI;
+            ballProp::theta -= (ballProp::velocityX/r * ellapsedTime)*180.0f/M_PI;
         }
         else{  
             float reboundVelocity = 0;
@@ -476,7 +478,7 @@ void simulateHorizontalMovement(float ellapsedTime){
             }
             ballPos::col += ballProp::velocityX * ellapsedTime;
             float r = 2.0f;
-            ballProp::theta -= (ballProp::velocityX/r)*180.0f/M_PI;       
+            ballProp::theta -= (ballProp::velocityX/r * ellapsedTime)*180.0f/M_PI;       
 
             //Assume that energy disappation leaves only half velocity remaining
             if(reboundVelocity/2.0f < .5f)

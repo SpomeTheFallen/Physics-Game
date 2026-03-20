@@ -55,8 +55,13 @@ void Renderer::setRender(RenderType type){
 
             Texture* homescreen = new Texture(0, "Rendering/resources/textures/homescreen.png");
             Texture* homescreenB1 = new Texture(1, "Rendering/resources/textures/homescreenB1.png");
+            Texture* homescreenB2 = new Texture(2, "Rendering/resources/textures/homescreenB2.png");
+            Texture* homescreenB3 = new Texture(3, "Rendering/resources/textures/homescreenB3.png");
             _textures.push_back(homescreen);
             _textures.push_back(homescreenB1);
+            _textures.push_back(homescreenB2);
+            _textures.push_back(homescreenB3);
+            
 
             const int samplerSize = _textures.size();
             int samplers[samplerSize];
@@ -103,8 +108,12 @@ void Renderer::updateQuads(){
         case RenderType::HomeScreen:{
             _quads->clear();
             int tex;
-            if(homescreen::signals::B1selected)
+            if(homescreen::row == 0 && homescreen::col == 0)
                 tex = 1;
+            else if(homescreen::row == 0 && homescreen::col == 1)
+                tex = 2;
+            else if(homescreen::row == 1 && homescreen::col == 0)
+                tex = 3;
             else
                 tex = 0;
             
@@ -122,14 +131,10 @@ void Renderer::updateQuads(){
 
             //ball
             int ballTex;
-            if(signals::springed1){
+            if(signals::springed1)
                 ballTex = 2;
-                ballProp::theta = 0;
-            }
-            else if(signals::springed2){
+            else if(signals::springed2)
                 ballTex = 3;
-                ballProp::theta = 0;
-            }
             else
                 ballTex = 1;
             _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, ballTex, glm::vec3(ball_x+1.5f, ball_y-.5f, 0.0f), glm::vec3(2.0f, 2.0f, 1.0f), ballProp::theta);

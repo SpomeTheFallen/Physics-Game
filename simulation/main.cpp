@@ -14,20 +14,28 @@ void homeScreenLoop(Renderer &renderer){
     if(nextKeyTime <= std::chrono::steady_clock::now()){
         keyPress = true; 
         //TRANSITION STATE   
-        if(homescreen::signals::B1selected && renderer.readKey(GLFW_KEY_ENTER)){
-            levels::setLevel0();
+        if((homescreen::row == 0 && homescreen::col == 0) && renderer.readKey(GLFW_KEY_ENTER)){
+            levels::setLevel(levelType::level0);
             renderer.setRender(RenderType::currentLevel);
         }
-        else if(homescreen::signals::B1selected && renderer.readKey(GLFW_KEY_E)){
-            levels::setLevel1();
+        else if((homescreen::row == 0 && homescreen::col == 1) && renderer.readKey(GLFW_KEY_ENTER)){
+            levels::setLevel(levelType::level1);
+            renderer.setRender(RenderType::currentLevel);
+        }
+        else if((homescreen::row == 1 && homescreen::col == 0) && renderer.readKey(GLFW_KEY_ENTER)){
+            levels::setLevel(levelType::level2);
             renderer.setRender(RenderType::currentLevel);
         }
 
         //Non-transition key checking
         else if(renderer.readKey(GLFW_KEY_S))
-            homescreen::signals::B1selected = true;
+            homescreen::row = 1;
         else if(renderer.readKey(GLFW_KEY_W))
-            homescreen::signals::B1selected = false;
+            homescreen::row = 0;
+        else if(renderer.readKey(GLFW_KEY_D))
+            homescreen::col = 1;
+        else if(renderer.readKey(GLFW_KEY_A))
+            homescreen::col = 0;
         else
             keyPress = false;
         if(keyPress)
@@ -70,7 +78,6 @@ void basicGameLoop(Renderer &renderer){
             else if (renderer.readKey(GLFW_KEY_A)) chargeForce(direction::left);
             else if (renderer.readKey(GLFW_KEY_W)) chargeForce(direction::uncompress);
             else if (renderer.readKey(GLFW_KEY_S)) chargeForce(direction::compress);
-            else if (renderer.readKey(GLFW_KEY_E)) executeForce();
             else{
                 keyPress = false;
             }
