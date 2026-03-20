@@ -118,7 +118,6 @@ void Renderer::updateQuads(){
                 tex = 0;
             
             _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, tex, glm::vec3(1000.0f/2.0f, 800.0f/2.0f, 0.0f), glm::vec3(1000.0f, 800.0f, 1.0f));
-            _VAO->Repackage(_quads->Indices().data(), _quads->Indices().size(), _quads->Vertices().data(), _quads->Vertices().size());
         }
         break;
         case RenderType::currentLevel:{
@@ -179,12 +178,10 @@ void Renderer::updateQuads(){
                 if(forceBar::bar[i] == 1)
                     _quads->makeSquare(1.0f, 1.0f, 1.0f, 1.0f, 0, glm::vec3(forceBar::col, 35-forceBar::row-i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
             }
-
-        
-            _VAO->Repackage(_quads->Indices().data(), _quads->Indices().size(), _quads->Vertices().data(), _quads->Vertices().size());
         }
         break;
     }
+    _VAO->Repackage(_quads->Indices().data(), _quads->Indices().size(), _quads->Vertices().data(), _quads->Vertices().size());
 }
 
 void Renderer::render(){
